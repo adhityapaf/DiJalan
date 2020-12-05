@@ -8,6 +8,7 @@ import LoginScreen from './screen/LoginScreen';
 import RegisterScreen from './screen/RegisterScreen';
 import LaporScreen from './screen/LaporScreen';
 import HomeActivity from './screen/HomeActivity';
+import DetailActivity from './screen/DetailPostActivity';
 const Stack = createStackNavigator();
 
 class App extends Component {
@@ -46,6 +47,9 @@ class App extends Component {
           component={HomeActivity}
           options={{headerShown: false}}
           />
+          <Stack.Screen
+          name="Detail"
+          component ={DetailActivity}/>
         </Stack.Navigator>
       </NavigationContainer>
     );
