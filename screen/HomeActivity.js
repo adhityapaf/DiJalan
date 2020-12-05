@@ -8,7 +8,9 @@ const Tab = createBottomTabNavigator();
 
 const App = () => {
   return (    
-    <NavigationContainer>
+    <NavigationContainer
+    independent={true}
+    >
       <Tab.Navigator>
         <Tab.Screen 
           name="Home" 
