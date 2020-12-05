@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import IconMaterial from 'react-native-vector-icons/MaterialCommunityIcons';
 import TabsNavigation from './HomeTopNavigation'; 
+import EditProfile from './edit_profile/index';
 
 const Tab = createBottomTabNavigator();
 
@@ -34,7 +35,7 @@ const App = () => {
            /> 
            <Tab.Screen 
           name="Profil" 
-          component={TabsNavigation}
+          component={EditProfile}
           options={{
             tabBarLabel:'Akun',
             tabBarIcon:({color})=>(
