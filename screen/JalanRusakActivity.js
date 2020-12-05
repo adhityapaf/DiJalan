@@ -7,9 +7,11 @@ import {
   Text,  
   FlatList,
   Image,
+  TouchableWithoutFeedback
 } from 'react-native';
 
 import {Button,IconButton,Colors,Icon,Card,List,Paragraph,Avatar} from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 
 const LeftContent = props => <Avatar.Image {...props} source={require('../assets/img.jpeg')}/>
 const RightContent = props => <IconButton {...props} icon="dots-vertical"/>
@@ -30,8 +32,9 @@ const DATA = [
   ];
   
 
-const PostItem = ({item}) =>{
-    return(    
+const PostItem = ({item}) =>{  
+    return( 
+      <TouchableWithoutFeedback >
         <Card style={styles.CardContainer}>
         <Card.Title title="Username" subtitle="Alamat" left={LeftContent} right={RightContent}/>        
         <Card.Content>          
@@ -49,15 +52,19 @@ const PostItem = ({item}) =>{
             </View>
         </Card.Actions>
       </Card>
+      </TouchableWithoutFeedback>   
     )
 } 
 
-const JalanRusakjActivity = ()=>{
+const JalanRusakjActivity = ({navigation})=>{    
     return (        
         <View style={styles.Container}>
-            <FlatList
+          <TouchableWithoutFeedback onPress = {()=> navigation.navigate("Detail")}>
+            <FlatList            
             data ={DATA}
-            renderItem={PostItem}/>                      
+            renderItem={
+              PostItem}/>                      
+              </TouchableWithoutFeedback>
         </View>
     )
 }
