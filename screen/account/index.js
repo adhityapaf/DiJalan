@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 
 import { Image, View, Text, StyleSheet, ScrollView, FlatList } from "react-native";
@@ -46,7 +47,8 @@ const PostItem = ({ item }) => {
     )
 }
 
-const App = ({ navigation }) => {
+function AccountScreen () {
+    const navigation = useNavigation();
     return (
         <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center' }}>
             <View style={{ flex: 1, flexDirection: 'column', alignSelf: 'stretch', padding: 24, backgroundColor: '#FFFFFF' }}>
@@ -65,7 +67,7 @@ const App = ({ navigation }) => {
                     mode="contained"
                     style={{ marginTop: 16 }}
                     color="#0984E3"
-                    // onPress={() => navigation.navigate('Edit Profile')}
+                    onPress={() => navigation.navigate('EditProfile')}
                     >
                     EDIT PROFILE
                     </Button>
@@ -96,4 +98,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default App;
+export default AccountScreen;
