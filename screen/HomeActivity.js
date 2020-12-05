@@ -5,38 +5,15 @@ import { createStackNavigator } from '@react-navigation/stack';
 import IconMaterial from 'react-native-vector-icons/MaterialCommunityIcons';
 import TabsNavigation from './HomeTopNavigation';
 import EditProfile from './edit_profile/index';
-import Account from './account';
-
+import AccountScreen from './account/index';
+import DetailPostActivity from './DetailPostActivity';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-function App() {
-  return (
-    <NavigationContainer
-      independent={true}
-    >
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Home"
-          component={HomeActivity}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Edit Profile"
-          component={EditProfile}
-          options={{ headerShown: false }}
-        />
 
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
 
-const HomeActivity = () => {
+function HomeActivity() {
   return (
-    <NavigationContainer
-      independent={true}
-    >
       <Tab.Navigator>
         <Tab.Screen
           name="Home"
@@ -60,7 +37,7 @@ const HomeActivity = () => {
         />
         <Tab.Screen
           name="Profil"
-          component={Account}
+          component={AccountScreen}
           options={{
             tabBarLabel: 'Akun',
             tabBarIcon: ({ color }) => (
@@ -69,8 +46,32 @@ const HomeActivity = () => {
           }}
         />
       </Tab.Navigator>
-    </NavigationContainer>
   );
 }
 
+function App() {
+  return (
+    <NavigationContainer
+      independent={true}>
+      <Stack.Navigator initialRouteName="App">
+        <Stack.Screen
+          name="Home"
+          component={HomeActivity}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="EditProfile"
+          component={EditProfile}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Detail"
+          component={DetailPostActivity}
+          options={{ headerShown: false }}
+        />
+
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
 export default App;

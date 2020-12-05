@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Image, View, Text, Dimensions, ScrollView } from "react-native";
 import { TextInput, Button } from 'react-native-paper';
 
-const App = () => {
+const EditProfile = () => {
     const [name, setName] = useState("");
     const [noHandphone, setNoHandphone] = useState("");
     const [email, setEmail] = useState("");
@@ -75,4 +75,4 @@ const App = () => {
         </ScrollView>
     );
 }
-export default App;
+export default EditProfile;

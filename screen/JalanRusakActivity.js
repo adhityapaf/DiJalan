@@ -30,36 +30,42 @@ const DATA = [
       title: 'Third Item',
     },
   ];
-  
+
+const Item = () => {
+  const navigation = useNavigation();
+  return( 
+    <TouchableWithoutFeedback onPress={() => navigation.navigate('Detail')}>
+      <Card style={styles.CardContainer}>
+      <Card.Title title="Username" subtitle="Alamat" left={LeftContent} right={RightContent}/>        
+      <Card.Content>          
+        <Paragraph>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ac hendrerit scelerisque pharetra, diam. Duis ac, molestie fringilla platea purus, duis feugiat pellentesque. </Paragraph>
+      </Card.Content>
+      <Card.Cover source={{ uri: 'https://picsum.photos/700' }} />
+      <Card.Actions>
+          <View style={styles.CardAction}>
+              <Text>10/10/2020</Text>
+              <Button
+              icon="thumb-up">77</Button>
+              <Button
+              icon="comment"
+              >10</Button>
+          </View>
+      </Card.Actions>
+    </Card>
+    </TouchableWithoutFeedback>   
+  )
+}
 
 const PostItem = ({item}) =>{  
     return( 
-      <TouchableWithoutFeedback >
-        <Card style={styles.CardContainer}>
-        <Card.Title title="Username" subtitle="Alamat" left={LeftContent} right={RightContent}/>        
-        <Card.Content>          
-          <Paragraph>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ac hendrerit scelerisque pharetra, diam. Duis ac, molestie fringilla platea purus, duis feugiat pellentesque. </Paragraph>
-        </Card.Content>
-        <Card.Cover source={{ uri: 'https://picsum.photos/700' }} />
-        <Card.Actions>
-            <View style={styles.CardAction}>
-                <Text>10/10/2020</Text>
-                <Button
-                icon="thumb-up">77</Button>
-                <Button
-                icon="comment"
-                >10</Button>
-            </View>
-        </Card.Actions>
-      </Card>
-      </TouchableWithoutFeedback>   
+      <Item />
     )
 } 
 
 const JalanRusakjActivity = ({navigation})=>{    
     return (        
         <View style={styles.Container}>
-          <TouchableWithoutFeedback onPress = {()=> navigation.navigate("Detail")}>
+          <TouchableWithoutFeedback>
             <FlatList            
             data ={DATA}
             renderItem={
