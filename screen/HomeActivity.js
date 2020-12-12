@@ -9,6 +9,7 @@ import AccountScreen from './account/index';
 import DetailPostActivity from './DetailPostActivity';
 import MapActivity from './MapActivity';
 import LaporScreen from './LaporScreen';
+import MapsActivity from './maps/index'
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -29,7 +30,7 @@ function HomeActivity() {
         />
         <Tab.Screen
           name="Map"
-          component={MapActivity}
+          component={MapsActivity}
           options={{
             tabBarLabel: 'Peta',
             tabBarIcon: ({ color }) => (
