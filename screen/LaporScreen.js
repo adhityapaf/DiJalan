@@ -92,7 +92,8 @@ class LaporActivity extends Component {
         },
       };
       ImagePicker.launchCamera(options, (response) => {
-        console.log('Response = ', response);
+        // console.log('Response = ', response);
+        this.setModalVisible(false);
 
         if (response.didCancel) {
           console.log('User cancelled image picker');
@@ -117,8 +118,8 @@ class LaporActivity extends Component {
         },
       };
       ImagePicker.launchImageLibrary(options, (response) => {
-        console.log('Response = ', response);
-  
+        // console.log('Response = ', response);
+        this.setModalVisible(false);
         if (response.didCancel) {
           console.log('User cancelled image picker');
         } else if (response.error) {
