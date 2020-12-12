@@ -7,6 +7,7 @@ import TabsNavigation from './HomeTopNavigation';
 import EditProfile from './edit_profile/index';
 import AccountScreen from './account/index';
 import DetailPostActivity from './DetailPostActivity';
+import MapsActivity from './maps/index'
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -27,7 +28,7 @@ function HomeActivity() {
         />
         <Tab.Screen
           name="Map"
-          component={TabsNavigation}
+          component={MapsActivity}
           options={{
             tabBarLabel: 'Peta',
             tabBarIcon: ({ color }) => (
