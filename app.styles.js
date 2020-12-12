@@ -52,5 +52,75 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     marginTop: 20,
   },
+  fab: {
+    backgroundColor: "#0984E3"
+  },
+  jenisLaporanContainer : {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 20,
+    
+  },
+  jenisLaporanItems: {
+    backgroundColor: "#0984E3",
+    width: 137,
+    height: 92,
+    borderRadius: 4,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  jenisLaporanIcon: {
+    height: 30,
+    width: 30
+  },
+  jenisLaporanLabel: {
+    marginTop: 8,
+    fontSize: 16,
+    color: "#FFFFFF"
+  },
+  header: {
+    backgroundColor: "#FFFFFF",
+    paddingTop: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  panelHeader: {
+    alignItems: "center"
+  },
+  panelHandle: {
+    width: 40,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#000000",
+    marginBottom: 10
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent:"center",
+    alignItems: "center",
+    marginTop: 22
+  },
+  modalView: {
+    margin: 20,
+    width: 280,
+    height: 105,
+    backgroundColor: "white",
+    padding: 20,
+    alignItems: "center",
+    alignContent:"center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5
+  },
+  modalText: {
+    fontSize: 20,
+    textAlign: "center"
+  }
 });
 export default styles;

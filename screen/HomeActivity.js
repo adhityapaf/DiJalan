@@ -7,6 +7,8 @@ import TabsNavigation from './HomeTopNavigation';
 import EditProfile from './edit_profile/index';
 import AccountScreen from './account/index';
 import DetailPostActivity from './DetailPostActivity';
+import MapActivity from './MapActivity';
+import LaporScreen from './LaporScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -27,7 +29,7 @@ function HomeActivity() {
         />
         <Tab.Screen
           name="Map"
-          component={TabsNavigation}
+          component={MapActivity}
           options={{
             tabBarLabel: 'Peta',
             tabBarIcon: ({ color }) => (
@@ -68,6 +70,13 @@ function App() {
           name="Detail"
           component={DetailPostActivity}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Lapor"
+          component={LaporScreen}
+          options={({route}) => ({ title: route.params.title, headerStyle: {backgroundColor: '#005690'},
+          headerTintColor: '#FFFFFF',
+          headerTitleStyle: {fontWeight: 'normal'}})}
         />
 
       </Stack.Navigator>
