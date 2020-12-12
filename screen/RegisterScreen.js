@@ -16,6 +16,8 @@ import {
 } from 'react-native-paper';
 import styles from '../app.styles';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import auth from '@react-native-firebase/auth';
+import { useNavigation } from '@react-navigation/native';
 
 const theme = {
   ...DefaultTheme,
@@ -27,95 +29,151 @@ const theme = {
   },
 };
 
-function RegisterScreen({navigation}) {
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [hiddenPass, hiddenState] = React.useState(true);
-  const [namaLengkap, setNamaLengkap] = React.useState('');
-  const [noHp, setNoHp] = React.useState('');
-  return (
-    <PaperProvider theme={theme}>
-      <View style={styles.welcome_container}>
-        <ImageBackground
-          source={require('../assets/background_welcome.png')}
-          style={{
-            resizeMode: 'center',
-            flex: 1,
-          }}>
-          <View style={{padding: 40}}>
-            <Image
-              style={styles.img_register}
-              source={require('../assets/logo.png')}
-            />
-            <View>
-              <TextInput
-                style={styles.register_textField}
-                label="Nama Lengkap"
-                mode="outlined"
-                keyboardType="default"
-                selectionColor="#0984E3"
-                value={namaLengkap}
-                onChangeText={(text) => setNamaLengkap(text)}
+class RegisterActivity extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: '',
+      password: '',
+      hiddenState: true,
+      namaLengkap: '',
+      noHp: '',
+    };
+  }
+
+  setHiddenState = (visible) => {
+    this.setState({hiddenState: visible});
+  }
+
+  handleEmail = (text) => {
+    this.setState({email: text});
+  }
+
+  handlePassword = (text) => {
+    this.setState({password : text});
+  }
+
+  handleNama = (text) => {
+    this.setState({namaLengkap : text});
+  }
+
+  handleNoHp = (text) => {
+    this.setState({noHp : text});
+  }
+
+  createUser = () => {
+    auth()
+      .createUserWithEmailAndPassword(
+        'jane.doe@example.com',
+        'SuperSecretPassword!',
+      )
+      .then(() => {
+        console.log('User account created & signed in!');
+      })
+      .catch((error) => {
+        if (error.code === 'auth/email-already-in-use') {
+          console.log('That email address is already in use!');
+        }
+
+        if (error.code === 'auth/invalid-email') {
+          console.log('That email address is invalid!');
+        }
+
+        console.error(error);
+      });
+  };
+
+  logOff = () => {
+    auth()
+      .signOut()
+      .then(() => console.log('User signed out!'));
+  };
+
+  render() {
+    return (
+      <PaperProvider theme={theme}>
+        <View style={styles.welcome_container}>
+          <ImageBackground
+            source={require('../assets/background_welcome.png')}
+            style={{
+              resizeMode: 'center',
+              flex: 1,
+            }}>
+            <View style={{padding: 40}}>
+              <Image
+                style={styles.img_register}
+                source={require('../assets/logo.png')}
               />
-              <TextInput
-                style={styles.register_textField}
-                label="Email"
-                mode="outlined"
-                keyboardType="email-address"
-                selectionColor="#0984E3"
-                value={email}
-                onChangeText={(text) => setEmail(text)}
-              />
-              <TextInput
-                style={styles.register_textField}
-                label="Password"
-                autoCompleteType="password"
-                mode="outlined"
-                secureTextEntry={hiddenState ? true : false}
-                value={password}
-                onChangeText={(text) => setPassword(text)}
-                right={
-                  <TextInput.Icon
-                    name={hiddenState ? 'eye-off' : 'eye'}
-                    size={24}
-                    onPress={() => hiddenState(!hiddenPass)}
-                  />
-                }
-              />
-              <TextInput
-                style={styles.register_textField}
-                label="Nomer Handphone"
-                mode="outlined"
-                keyboardType="number-pad"
-                selectionColor="#0984E3"
-                value={noHp}
-                onChangeText={(text) => setNoHp(text)}
-              />
-              <TouchableRipple
-                onPress={() => console.log('Pressed')}
-                style={styles.button}
-                rippleColor="rgba(0, 0, 0, .32)">
-                <Text style={styles.buttonText}>REGISTRASI</Text>
-              </TouchableRipple>
-              <Text style={{alignSelf: 'center', marginTop: 10}}>
-                Sudah Punya Akun? Yuk
-              </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text
-                  style={{
-                    color: '#0984E3',
-                    fontWeight: 'bold',
-                    alignSelf: 'center',
-                  }}>
-                  Login
+              <View>
+                <TextInput
+                  style={styles.register_textField}
+                  label="Nama Lengkap"
+                  mode="outlined"
+                  keyboardType="default"
+                  selectionColor="#0984E3"
+                  value={this.namaLengkap}
+                  onChangeText={this.handleNama}
+                />
+                <TextInput
+                  style={styles.register_textField}
+                  label="Email"
+                  mode="outlined"
+                  keyboardType="email-address"
+                  selectionColor="#0984E3"
+                  value={this.email}
+                  onChangeText={this.handleEmail}
+                />
+                <TextInput
+                  style={styles.register_textField}
+                  label="Password"
+                  autoCompleteType="password"
+                  mode="outlined"
+                  secureTextEntry={true}
+                  value={this.password}
+                  onChangeText={this.handlePassword}
+                  right={
+                    <TextInput.Icon
+                      name='eye-off'
+                      size={24}
+                      onPress={console.log('eye clicked')}
+                    />
+                  }
+                />
+                <TextInput
+                  style={styles.register_textField}
+                  label="Nomer Handphone"
+                  mode="outlined"
+                  keyboardType="number-pad"
+                  selectionColor="#0984E3"
+                  value={this.noHp}
+                  onChangeText={this.handleNoHp}
+                />
+                <TouchableRipple
+                  onPress={() => {this.props.navigation.navigate('Home')}}
+                  style={styles.button}
+                  rippleColor="rgba(0, 0, 0, .32)">
+                  <Text style={styles.buttonText}>REGISTRASI</Text>
+                </TouchableRipple>
+                <Text style={{alignSelf: 'center', marginTop: 10}}>
+                  Sudah Punya Akun? Yuk
                 </Text>
-              </TouchableOpacity>
+                <TouchableOpacity onPress={() => {this.props.navigation.navigate('Login')}}>
+                  <Text
+                    style={{
+                      color: '#0984E3',
+                      fontWeight: 'bold',
+                      alignSelf: 'center',
+                    }}>
+                    Login
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </ImageBackground>
-      </View>
-    </PaperProvider>
-  );
+          </ImageBackground>
+        </View>
+      </PaperProvider>
+    );
+  }
 }
 
-export default RegisterScreen;
+export default RegisterActivity;

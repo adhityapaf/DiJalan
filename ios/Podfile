@@ -11,6 +11,8 @@ target 'DiJalan' do
   pod 'react-native-splash-screen', :path => '../node_modules/react-native-splash-screen'
   pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
+  pod 'react-native-image-picker', :path => '../node_modules/react-native-image-picker'
+
   target 'DiJalanTests' do
     inherit! :complete
     # Pods for testing

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "684593292248",
+    "project_id": "dijalan-project",
+    "storage_bucket": "dijalan-project.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:684593292248:android:e2b758b23ba852dc0688ad",
+        "android_client_info": {
+          "package_name": "com.dijalan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "684593292248-ec762eqj9j46nb7d4q8lm62rt7do089c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdnbufLKNcnqZ9yua6VbX1RAqO1sCRzXM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "684593292248-ec762eqj9j46nb7d4q8lm62rt7do089c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
