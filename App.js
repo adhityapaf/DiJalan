@@ -1,11 +1,13 @@
 import 'react-native-gesture-handler';
 import React, {Component} from 'react';
-import {View, Text} from 'react-native';
+import {View, Text,Image} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import Providers from './navigation';
 const AppStack = createStackNavigator();
+
+
 
 class App extends Component {
   componentDidMount() {
@@ -16,7 +18,40 @@ class App extends Component {
 
   render() {
     return (
-        <Providers />
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="Register"
+            component={RegisterScreen}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="Lapor"
+            component={LaporScreen}
+            options={{
+              headerShown: true,
+              title: 'Lapor',
+              headerStyle: {backgroundColor: '#0984E3'},
+              headerTintColor: '#FFFFFF',
+            }}
+          />
+          <Stack.Screen
+          name="Main"
+          component={HomeActivity}   
+          options={{
+            headerShown:false
+          }}    
+          />
+          <Stack.Screen
+          name="Detail"
+          component ={DetailActivity}/>
+        </Stack.Navigator>
+      </NavigationContainer>
     );
   }
 }

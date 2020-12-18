@@ -6,17 +6,17 @@ import IconMaterial from 'react-native-vector-icons/MaterialCommunityIcons';
 import TabsNavigation from './HomeTopNavigation';
 import EditProfile from './edit_profile/index';
 import AccountScreen from './account/index';
-import DetailPostActivity from './DetailPostActivity';
-import MapActivity from './MapActivity';
 import LaporScreen from './LaporScreen';
 import MapsActivity from './maps/index'
 import { AuthContext } from '../navigation/AuthProvider';
+import MapsActivity from './maps/index';
+import Header from '../shared/header';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 
 
-function HomeActivity() {
+function MainActivity() {
   const {user} = useContext(AuthContext);
   console.log(user.id);
   return (
@@ -24,7 +24,7 @@ function HomeActivity() {
         <Tab.Screen
           name="Home"
           component={TabsNavigation}
-          options={{
+          options={{                                
             tabBarLabel: 'Beranda',
             tabBarIcon: ({ color }) => (
               <IconMaterial name="home" color={color} size={26} />
@@ -48,33 +48,33 @@ function HomeActivity() {
             tabBarLabel: 'Akun',
             tabBarIcon: ({ color }) => (
               <IconMaterial name="account-circle" color={color} size={26} />
-            )
+            ),
+            headerShown:true
           }}
         />
       </Tab.Navigator>
   );
 }
 
-function App() {
-  return (
+class App extends React.Component {
+  render(){
+  return (      
     <NavigationContainer
       independent={true}>
       <Stack.Navigator initialRouteName="App">
         <Stack.Screen
           name="Home"
-          component={HomeActivity}
-          options={{ headerShown: false }}
+          component={MainActivity}
+          options={{    
+            headerShown:false,                             
+        }}
         />
         <Stack.Screen
           name="EditProfile"
           component={EditProfile}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="Detail"
-          component={DetailPostActivity}
-          options={{ headerShown: false }}
-        />
+     
         <Stack.Screen
           name="Lapor"
           component={LaporScreen}
@@ -86,5 +86,6 @@ function App() {
       </Stack.Navigator>
     </NavigationContainer>
   );
+  }
 }
 export default App;
