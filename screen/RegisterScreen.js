@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   ImageBackground,
+  ToastAndroid,
 } from 'react-native';
 import {
   TextInput,
@@ -36,7 +37,7 @@ const RegisterScreen = ({navigation}) => {
   const [noHp, handleNoHp] = React.useState('');
   const [password, handlePassword] = React.useState('');
   const [hiddenPass, hiddenState] = React.useState(true);
-
+  let bio ="";
   const {register} = useContext(AuthContext);
   return(
     <PaperProvider theme={theme}>
@@ -97,7 +98,7 @@ const RegisterScreen = ({navigation}) => {
                   onChangeText={handleNoHp}
                 />
                 <TouchableRipple
-                  onPress={() => register(email, password, namaLengkap, noHp)}
+                  onPress={() => {email == '' || password == '' || namaLengkap == '' || noHp == '' ? ToastAndroid.show('Ada field yang belum terisi',ToastAndroid.SHORT) : register(email, password, namaLengkap, noHp, bio)}}
                   style={styles.button}
                   rippleColor="rgba(0, 0, 0, .32)">
                   <Text style={styles.buttonText}>REGISTRASI</Text>

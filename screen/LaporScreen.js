@@ -47,7 +47,14 @@ class LaporActivity extends Component {
       modalVisible: false,
       image: '',
       userName: '',
+      userLat: '',
+      userLong: '',
+      header: ''
     };
+  }
+  
+  setHeader = (text) => {
+    this.setState({header: text});
   }
 
   setModalVisible = (visible) => {
@@ -73,11 +80,17 @@ class LaporActivity extends Component {
   setUserName = (text) => {
     this.setState({userName: text});
   };
+  setUserLat = (text) => {
+    this.setState({userLat: text});
+  };
+  setUserLong = (text) => {
+    this.setState({userLong: text});
+  };
 
   takePhotoFromCamera = () => {
     ImagePickerCrop.openCamera({
-      compressImageMaxWidth: 422,
-      compressImageMaxHeight: 202,
+      width: 422,
+      height: 202,
       cropping: true,
       compressImageQuality: 0.7,
     }).then((image) => {
@@ -117,9 +130,27 @@ class LaporActivity extends Component {
       );
     }
   }
-
+  findCoordinates = () => {
+    navigator.geolocation = require('@react-native-community/geolocation');
+    navigator.geolocation.getCurrentPosition(
+      (geo_success) => {
+        // setLocation(geo_success);
+        console.log(geo_success.coords.latitude);
+        console.log(geo_success.coords.longitude);
+        this.setUserLat(geo_success.coords.latitude);
+        this.setUserLong(geo_success.coords.longitude);
+      },
+      (error) => Alert.alert(error.message),
+    );
+  };
   submitAction = async () => {
     const {navigation} = this.props;
+    const {route} = this.props;
+    const {title } = route.params;
+    let jenisLaporan = JSON.stringify(title);
+    let laporan = jenisLaporan.replace('"','').replace('"','');
+    console.log("Jenis laporan : "+laporan);
+    this.findCoordinates();
     const getCurrentDate = () => {
       var date = new Date().getDate();
       var month = new Date().getMonth() + 1;
@@ -161,7 +192,8 @@ class LaporActivity extends Component {
       try {
         await task;
         const urlImage = await ref.getDownloadURL();
-        const reference = await database().ref('/posts/').push();
+        if (laporan == "Lapor Jalan Rusak") {
+          const reference = await database().ref('/posts/').push();
         console.log('Child Key ' + reference.key);
         await reference
           .set({
@@ -171,9 +203,26 @@ class LaporActivity extends Component {
             postDate: getCurrentDate(),
             postAddress: '',
             postLike: 0,
-            postComment: 0,
+            postLat: this.state.userLat,
+            postLong: this.state.userLong
           })
           .then(() => console.log('Post Data set.'));
+        } else if (laporan == "Lapor Kecelakaan"){
+          const reference = await database().ref('/posts_kecelakaan/').push();
+        console.log('Child Key ' + reference.key);
+        await reference
+          .set({
+            postOwner: this.state.userName,
+            postImage: urlImage,
+            postCaption: this.state.caption,
+            postDate: getCurrentDate(),
+            postAddress: '',
+            postLike: 0,
+            postLat: this.state.userLat,
+            postLong: this.state.userLong
+          })
+          .then(() => console.log('Post Data set.'));
+        }
         this.setUploading(false);
         Alert.alert(
           'Gambar Berhasil di Upload!',
@@ -192,6 +241,7 @@ class LaporActivity extends Component {
   render() {
     const {modalVisible} = this.state;
     const {uploading} = this.state;
+
     return (
       <PaperProvider theme={theme}>
         <View>
