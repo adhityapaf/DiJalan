@@ -1,5 +1,5 @@
-import React, {Component} from 'react';
-import {useState} from 'react';
+import React, {Component, useContext} from 'react';
+import {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,8 @@ import {
 } from 'react-native-paper';
 import styles from '../app.styles';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import auth from '@react-native-firebase/auth';
+import {AuthContext} from '../navigation/AuthProvider';
 
 const theme = {
   ...DefaultTheme,
@@ -27,11 +29,13 @@ const theme = {
   },
 };
 
-function LoginApp() {
+function LoginApp({navigation}) {
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
-
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [hiddenPass, hiddenState] = React.useState(true);
   // Handle user state changes
   function onAuthStateChanged(user) {
     setUser(user);
@@ -44,35 +48,32 @@ function LoginApp() {
   }, []);
 
   if (initializing) return null;
-
+  
   if (!user) {
     return (
       <View>
-        <Text>Login</Text>
-      </View>
+      <Text>Register</Text>
+    </View>
     );
   }
 
   return (
     <View>
-      <Text>Welcome {user.email}</Text>
+
     </View>
   );
-}
-
-class LoginActivity extends Component {
-  componentDidMount(){
-    <LoginApp />
-  }
 }
 
 function LoginScreen({navigation}) {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [hiddenPass, hiddenState] = React.useState(true);
+
+  const {login} = useContext(AuthContext);
   return (
     <PaperProvider theme={theme}>
       <View style={styles.welcome_container}>
+
         <ImageBackground
           source={require('../assets/background_welcome.png')}
           style={{
@@ -111,7 +112,7 @@ function LoginScreen({navigation}) {
                 }
               />
               <TouchableRipple
-                onPress={() => navigation.navigate('Home')}
+                onPress={() => login(email, password)}
                 style={styles.button}
                 rippleColor="rgba(0, 0, 0, .32)">
                 <Text style={styles.buttonText}>LOGIN</Text>

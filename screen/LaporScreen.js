@@ -8,6 +8,8 @@ import {
   ImageBackground,
   Modal,
   Alert,
+  ActivityIndicator,
+  ToastAndroid,
 } from 'react-native';
 import {
   TextInput,
@@ -19,6 +21,11 @@ import {
 import styles from '../app.styles';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ImagePicker, {launchCamera} from 'react-native-image-picker';
+import storage from '@react-native-firebase/storage';
+import ImagePickerCrop from 'react-native-image-crop-picker';
+import {useNavigation} from '@react-navigation/native';
+import database from '@react-native-firebase/database';
+import auth from '@react-native-firebase/auth';
 
 const theme = {
   ...DefaultTheme,
@@ -34,189 +41,224 @@ class LaporActivity extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      filePath: {
-        data: '',
-        uri: '',
-      },
-      fileData: '',
-      fileUri: '',
+      uploading: false,
+      transferred: 0,
       caption: '',
-      modalVisible: false
+      modalVisible: false,
+      image: '',
+      userName: '',
     };
   }
-  
+
   setModalVisible = (visible) => {
     this.setState({modalVisible: visible});
-  }
+  };
 
   handleCaption = (text) => {
-    this.setState({ caption: text })
+    this.setState({caption: text});
   };
 
-  chooseImage = () => {
-    let options = {
-      title: 'Pilih Gambar',
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
+  handleImage = (text) => {
+    this.setState({image: text});
+  };
 
-    ImagePicker.showImagePicker(options, (response) => {
-      console.log('Response = ', response);
+  setUploading = (text) => {
+    this.setState({uploading: text});
+  };
 
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('Image Picker Error: ', reponse.error);
-      } else {
-        const source = {uri: response.uri};
+  setTransferred = (number) => {
+    this.setState({transferred: number});
+  };
 
-        // You can also display the image using data:
-        // const source = { uri: 'data:image/jpeg;base64,' + response.data };
-        // alert(JSON.stringify(response));
-        console.log('response', JSON.stringify(response));
-        this.setState({
-          filePath: response,
-          fileData: response.data,
-          fileUri: response.uri,
-        });
-      }
+  setUserName = (text) => {
+    this.setState({userName: text});
+  };
+
+  takePhotoFromCamera = () => {
+    ImagePickerCrop.openCamera({
+      compressImageMaxWidth: 422,
+      compressImageMaxHeight: 202,
+      cropping: true,
+      compressImageQuality: 0.7,
+    }).then((image) => {
+      console.log(image);
+      this.handleImage(image.path);
+      this.setModalVisible(false);
     });
+  };
+
+  choosePhotoFromLibrary = () => {
+    ImagePickerCrop.openPicker({
+      width: 422,
+      height: 202,
+      cropping: true,
+      compressImageQuality: 0.7,
+    }).then((image) => {
+      console.log(image);
+      this.handleImage(image.path);
+      this.setModalVisible(false);
+    });
+  };
+
+  renderImage() {
+    if (!this.state.image) {
+      return (
+        <Image
+          source={require('../assets/placeholder-image.png')}
+          style={{height: 202, width: 422, alignSelf: 'stretch'}}
+        />
+      );
+    } else {
+      return (
+        <Image
+          source={{uri: this.state.image}}
+          style={{height: 202, alignSelf: 'stretch'}}
+        />
+      );
+    }
   }
-    launchCamera = () => {
-      let options = {
-        storageOptions: {
-          skipBackup: true,
-          path: 'images',
-        },
-      };
-      ImagePicker.launchCamera(options, (response) => {
-        console.log('Response = ', response);
 
-        if (response.didCancel) {
-          console.log('User cancelled image picker');
-        } else if (response.error) {
-          console.log('ImagePicker Error: ', response.error);
-        } else {
-          const source = {uri: response.uri};
-          // console.log('response', JSON.stringify(response));
-          this.setState({
-            filePath: response,
-            fileData: response.data,
-            fileUri: response.uri,
-          });
-        }
-      });
+  submitAction = async () => {
+    const {navigation} = this.props;
+    const getCurrentDate = () => {
+      var date = new Date().getDate();
+      var month = new Date().getMonth() + 1;
+      var year = new Date().getFullYear();
+
+      return date + '/' + month + '/' + year; //format: dd/mm/yyyy;
     };
-    launchImageLibrary = () => {
-      let options = {
-        storageOptions: {
-          skipBackup: true,
-          path: 'images',
-        },
-      };
-      ImagePicker.launchImageLibrary(options, (response) => {
-        console.log('Response = ', response);
-  
-        if (response.didCancel) {
-          console.log('User cancelled image picker');
-        } else if (response.error) {
-          console.log('ImagePicker Error: ', response.error);
-        } else {
-          const source = { uri: response.uri };
-          // console.log('response', JSON.stringify(response));
-          this.setState({
-            filePath: response,
-            fileData: response.data,
-            fileUri: response.uri
-          });
-        }
+    if (!this.state.caption || !this.state.image) {
+      Alert.alert('Ups', 'Gambar atau Caption belum terisi');
+    } else {
+      ToastAndroid.show('Mengunggah laporan..', ToastAndroid.SHORT);
+      await database()
+        .ref('/users/' + auth().currentUser.uid + '/name')
+        .once('value')
+        .then((snapshot) => {
+          console.log('User data: ', snapshot.val());
+          this.setUserName(snapshot.val());
+        });
+      const uploadUri = this.state.image;
+      console.log(uploadUri);
+      let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+      // nambahin timestamp ke nama file
+      const extension = filename.split('.').pop();
+      const name = filename.split('.').slice(0, -1).join('.');
+      filename = name + Date.now() + '.' + extension;
+      this.setUploading(true);
+      this.setTransferred(0);
+      const ref = storage().ref('posts/' + filename);
+      const task = ref.putFile(uploadUri);
+      task.on('state_changed', (taskSnapshot) => {
+        console.log(
+          `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+        );
+        this.setTransferred(
+          Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
+            100,
+        );
       });
-  
-    }
-  
-    // renderFileData() {
-    //   if (this.state.fileData) {
-    //     return <Image source={{ uri: 'data:image/jpeg;base64,' + this.state.fileData }}
-    //       style={styles.images}
-    //     />
-    //   } else {
-    //     return <Image source={require('./assets/dummy.png')}
-    //       style={styles.images}
-    //     />
-    //   }
-    // }
-  
-    renderFileUri() {
-      if (this.state.fileUri) {
-        return <Image
-          source={{ uri: this.state.fileUri }}
-          style={{height: 202, alignSelf: 'stretch'}}
-        />
-      } else {
-        return <Image
-          source={require('../assets/placeholder_jalanLubang.png')}
-          style={{height: 202, alignSelf: 'stretch'}}
-        />
+      try {
+        await task;
+        const urlImage = await ref.getDownloadURL();
+        const reference = await database().ref('/posts/').push();
+        console.log('Child Key ' + reference.key);
+        await reference
+          .set({
+            postOwner: this.state.userName,
+            postImage: urlImage,
+            postCaption: this.state.caption,
+            postDate: getCurrentDate(),
+            postAddress: '',
+            postLike: 0,
+            postComment: 0,
+          })
+          .then(() => console.log('Post Data set.'));
+        this.setUploading(false);
+        Alert.alert(
+          'Gambar Berhasil di Upload!',
+          'Gambar sudah berada di cloud~',
+          [{text: 'OK', onPress: () => navigation.navigate('Home')}],
+          {cancelable: false},
+        );
+      } catch (error) {
+        console.log(error);
       }
-    }
-
-    
-    render(){
-      const { modalVisible }= this.state;
-      return(
-<PaperProvider theme={theme}>
-      <View>
-        {this.renderFileUri()}
-        <View style={{padding: 20}}>
-          <TouchableRipple
-            onPress={() => this.setModalVisible(true)}
-            style={styles.button}
-            rippleColor="rgba(0, 0, 0, .32)">
-            <Text style={styles.buttonText}>Pilih Foto</Text>
-          </TouchableRipple>
-          <TextInput
-            style={styles.captionTextArea}
-            label="Caption"
-            mode="outlined"
-            keyboardType="default"
-            numberOfLines={5}
-            multiline={true}
-            selectionColor="#0984E3"
-            value={this.email}
-            textAlignVertical="top"
-            onChangeText={this.handleCaption}
-          />
-          <TouchableRipple
-            onPress={() => console.log('Submit clicked!')}
-            style={styles.button}
-            rippleColor="rgba(0, 0, 0, .32)">
-            <Text style={styles.buttonText}>Submit</Text>
-          </TouchableRipple>
-        </View>
-        <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => this.setModalVisible(false)}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}> 
-              <TouchableOpacity onPress={() => this.launchCamera()}>
-                <Text style={styles.modalText}>Kamera</Text>
-              </TouchableOpacity>
-              <View style={{width: 233, border: 1, backgroundColor: "#000", height:1, marginTop: 8, marginBottom: 8}} />
-              <TouchableOpacity onPress={() => this.launchImageLibrary()}>
-                <Text style={styles.modalText}>Galeri</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-      </View>
-    </PaperProvider>
-      )
+      this.handleCaption(null);
+      this.handleImage(null);
     }
   };
+
+  render() {
+    const {modalVisible} = this.state;
+    const {uploading} = this.state;
+    return (
+      <PaperProvider theme={theme}>
+        <View>
+          {this.renderImage()}
+          <View style={{padding: 20}}>
+            <TouchableRipple
+              onPress={() => this.setModalVisible(true)}
+              style={styles.button}
+              rippleColor="rgba(0, 0, 0, .32)">
+              <Text style={styles.buttonText}>Pilih Foto</Text>
+            </TouchableRipple>
+            <TextInput
+              style={styles.captionTextArea}
+              label="Caption"
+              mode="outlined"
+              keyboardType="default"
+              numberOfLines={5}
+              multiline={true}
+              selectionColor="#0984E3"
+              value={this.caption}
+              textAlignVertical="top"
+              onChangeText={this.handleCaption}
+            />
+            {uploading ? (
+              <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                <Text>{this.state.transferred} % Completed!</Text>
+                <ActivityIndicator size="large" color="#0984E3" />
+              </View>
+            ) : (
+              <TouchableRipple
+                onPress={() => this.submitAction()}
+                style={styles.button}
+                rippleColor="rgba(0, 0, 0, .32)">
+                <Text style={styles.buttonText}>Submit</Text>
+              </TouchableRipple>
+            )}
+          </View>
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => this.setModalVisible(false)}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <TouchableOpacity onPress={() => this.takePhotoFromCamera()}>
+                  <Text style={styles.modalText}>Kamera</Text>
+                </TouchableOpacity>
+                <View
+                  style={{
+                    width: 233,
+                    border: 1,
+                    backgroundColor: '#000',
+                    height: 1,
+                    marginTop: 8,
+                    marginBottom: 8,
+                  }}
+                />
+                <TouchableOpacity onPress={() => this.choosePhotoFromLibrary()}>
+                  <Text style={styles.modalText}>Galeri</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </View>
+      </PaperProvider>
+    );
+  }
+}
 
 export default LaporActivity;
