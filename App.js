@@ -4,12 +4,8 @@ import {View, Text} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import LoginScreen from './screen/LoginScreen';
-import RegisterScreen from './screen/RegisterScreen';
-import LaporScreen from './screen/LaporScreen';
-import HomeActivity from './screen/HomeActivity';
-import DetailActivity from './screen/DetailPostActivity';
-const Stack = createStackNavigator();
+import Providers from './navigation';
+const AppStack = createStackNavigator();
 
 class App extends Component {
   componentDidMount() {
@@ -20,38 +16,7 @@ class App extends Component {
 
   render() {
     return (
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="Register"
-            component={RegisterScreen}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="Lapor"
-            component={LaporScreen}
-            options={{
-              headerShown: true,
-              title: 'Lapor',
-              headerStyle: {backgroundColor: '#0984E3'},
-              headerTintColor: '#FFFFFF',
-            }}
-          />
-          <Stack.Screen
-          name="Home"
-          component={HomeActivity}
-          options={{headerShown: false}}
-          />
-          <Stack.Screen
-          name="Detail"
-          component ={DetailActivity}/>
-        </Stack.Navigator>
-      </NavigationContainer>
+        <Providers />
     );
   }
 }

@@ -1,9 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 
 import { Image, View, Text, StyleSheet, ScrollView, FlatList } from "react-native";
 import { Card, Button, Paragraph, Avatar, IconButton } from 'react-native-paper';
-
+import { AuthContext } from '../../navigation/AuthProvider';
+import auth from '@react-native-firebase/auth'
+import database from '@react-native-firebase/database';
 
 const LeftContent = props => <Avatar.Image {...props} source={require("../../assets/image_female.png")} />
 const RightContent = props => <IconButton {...props} icon="dots-vertical" />
@@ -49,29 +51,43 @@ const PostItem = ({ item }) => {
 
 function AccountScreen () {
     const navigation = useNavigation();
+    const [username, setUsername] = useState('');
+  const {logout} = useContext(AuthContext);
     return (
         <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center' }}>
-            <View style={{ flex: 1, flexDirection: 'column', alignSelf: 'stretch', padding: 24, backgroundColor: '#FFFFFF' }}>
-                <View style={{ flex: 1, flexDirection: 'row', alignSelf: 'stretch' }}>
+            <View style={{ flex: 2, flexDirection: 'column', alignSelf: 'stretch', padding: 24, backgroundColor: '#FFFFFF' }}>
+                <View style={{ flex: 0.8, flexDirection: 'row', alignSelf: 'stretch' }}>
                     <Image
                         source={require("../../assets/image_female.png")}
                         style={{ width: 85, height: 85, borderRadius: 85 / 2 }}
                     />
                     <View style={{ flex: 1, flexDirection: 'column', alignSelf: 'stretch', marginLeft: 16 }}>
-                        <Text style={{ color: '#000000', fontSize: 18, fontWeight: 'bold' }}>Nama Pengguna</Text>
+                        <Text style={{ color: '#000000', fontSize: 18, fontWeight: 'bold' }}>nama user</Text>
                         <Text style={{ color: '#000000', fontSize: 12, marginTop: 4 }}>Ini adalah Bio</Text>
                     </View>
 
                 </View>
-                <Button
+                <View style={{flex:1, flexDirection: 'column'}}>
+                    <Button
                     mode="contained"
-                    style={{ marginTop: 16 }}
+                    style={{ marginTop: 20 }}
                     color="#0984E3"
                     onPress={() => navigation.navigate('EditProfile')}
                     >
                     EDIT PROFILE
                     </Button>
+                <Button
+                    mode="contained"
+                    style={{ marginTop: 20 }}
+                    color="#0984E3"
+                    onPress={() => logout()}
+                    >
+                    Logout
+                    </Button>
             </View>
+                </View>
+
+                
             <View style={styles.Container}>
                 <FlatList
                     data={DATA}

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {useState} from 'react';
+import {useState, useContext} from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import styles from '../app.styles';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import auth from '@react-native-firebase/auth';
 import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../navigation/AuthProvider';
 
 const theme = {
   ...DefaultTheme,
@@ -29,69 +30,16 @@ const theme = {
   },
 };
 
-class RegisterActivity extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      email: '',
-      password: '',
-      hiddenState: true,
-      namaLengkap: '',
-      noHp: '',
-    };
-  }
+const RegisterScreen = ({navigation}) => {
+  const [email, handleEmail] = React.useState('');
+  const [namaLengkap, handleNama] = React.useState('');
+  const [noHp, handleNoHp] = React.useState('');
+  const [password, handlePassword] = React.useState('');
+  const [hiddenPass, hiddenState] = React.useState(true);
 
-  setHiddenState = (visible) => {
-    this.setState({hiddenState: visible});
-  }
-
-  handleEmail = (text) => {
-    this.setState({email: text});
-  }
-
-  handlePassword = (text) => {
-    this.setState({password : text});
-  }
-
-  handleNama = (text) => {
-    this.setState({namaLengkap : text});
-  }
-
-  handleNoHp = (text) => {
-    this.setState({noHp : text});
-  }
-
-  createUser = () => {
-    auth()
-      .createUserWithEmailAndPassword(
-        'jane.doe@example.com',
-        'SuperSecretPassword!',
-      )
-      .then(() => {
-        console.log('User account created & signed in!');
-      })
-      .catch((error) => {
-        if (error.code === 'auth/email-already-in-use') {
-          console.log('That email address is already in use!');
-        }
-
-        if (error.code === 'auth/invalid-email') {
-          console.log('That email address is invalid!');
-        }
-
-        console.error(error);
-      });
-  };
-
-  logOff = () => {
-    auth()
-      .signOut()
-      .then(() => console.log('User signed out!'));
-  };
-
-  render() {
-    return (
-      <PaperProvider theme={theme}>
+  const {register} = useContext(AuthContext);
+  return(
+    <PaperProvider theme={theme}>
         <View style={styles.welcome_container}>
           <ImageBackground
             source={require('../assets/background_welcome.png')}
@@ -111,8 +59,8 @@ class RegisterActivity extends Component {
                   mode="outlined"
                   keyboardType="default"
                   selectionColor="#0984E3"
-                  value={this.namaLengkap}
-                  onChangeText={this.handleNama}
+                  value={namaLengkap}
+                  onChangeText={handleNama}
                 />
                 <TextInput
                   style={styles.register_textField}
@@ -120,22 +68,22 @@ class RegisterActivity extends Component {
                   mode="outlined"
                   keyboardType="email-address"
                   selectionColor="#0984E3"
-                  value={this.email}
-                  onChangeText={this.handleEmail}
+                  value={email}
+                  onChangeText={handleEmail}
                 />
                 <TextInput
                   style={styles.register_textField}
                   label="Password"
                   autoCompleteType="password"
                   mode="outlined"
-                  secureTextEntry={true}
-                  value={this.password}
-                  onChangeText={this.handlePassword}
+                  secureTextEntry={hiddenPass}
+                  value={password}
+                  onChangeText={handlePassword}
                   right={
                     <TextInput.Icon
-                      name='eye-off'
+                      name={hiddenPass ? 'eye-off' : 'eye'}
                       size={24}
-                      onPress={console.log('eye clicked')}
+                      onPress={() => hiddenState(!hiddenState)}
                     />
                   }
                 />
@@ -145,11 +93,11 @@ class RegisterActivity extends Component {
                   mode="outlined"
                   keyboardType="number-pad"
                   selectionColor="#0984E3"
-                  value={this.noHp}
-                  onChangeText={this.handleNoHp}
+                  value={noHp}
+                  onChangeText={handleNoHp}
                 />
                 <TouchableRipple
-                  onPress={() => {this.props.navigation.navigate('Home')}}
+                  onPress={() => register(email, password, namaLengkap, noHp)}
                   style={styles.button}
                   rippleColor="rgba(0, 0, 0, .32)">
                   <Text style={styles.buttonText}>REGISTRASI</Text>
@@ -157,7 +105,7 @@ class RegisterActivity extends Component {
                 <Text style={{alignSelf: 'center', marginTop: 10}}>
                   Sudah Punya Akun? Yuk
                 </Text>
-                <TouchableOpacity onPress={() => {this.props.navigation.navigate('Login')}}>
+                <TouchableOpacity onPress={() => {navigation.navigate('Login')}}>
                   <Text
                     style={{
                       color: '#0984E3',
@@ -172,8 +120,6 @@ class RegisterActivity extends Component {
           </ImageBackground>
         </View>
       </PaperProvider>
-    );
-  }
+  );
 }
-
-export default RegisterActivity;
+export default RegisterScreen;
