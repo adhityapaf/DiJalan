@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React,{useEffect,useState}  from 'react';
 import {  
   StyleSheet,  
   View,
@@ -7,64 +7,72 @@ import {
 } from 'react-native';
 
 import {Button,IconButton,Card,Paragraph,Avatar,TextInput} from 'react-native-paper';
+import database from '@react-native-firebase/database';
+import auth from '@react-native-firebase/auth';
 
+const postComment = (id,comment,username)=>{    
+    database()
+    .ref('/posts/'+id+"/postComment")
+    .push()
+    .set({
+        name:username,
+        comment:comment,
+        date:getCurrentDate()
+    })
+    .then(()=>console.log("berhasil"));
+}
+const getCurrentDate = () => {
+    var date = new Date().getDate();
+    var month = new Date().getMonth() + 1;
+    var year = new Date().getFullYear();
 
-const LeftContent = props => <Avatar.Image {...props} source={require('../assets/img.jpeg')}/>
-const RightContent = props => <IconButton {...props} icon="dots-vertical"/>
+    return date + '/' + month + '/' + year; //format: dd/mm/yyyy;
+  };
 
-
-const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      username: 'Adhit',
-      comment:'Waaah bahaya itu'
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      username: 'Alwan',
-      comment:'Hati - hati yaa'
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571e29d72',
-      username: 'Mufti',
-      comment:'Waah'
-    },
-  ];
-  
-
-  const commentItem = ({item}) => (
-      
+const commentItem = ({item}) => (      
       <View style={styles.comment}>
           <Avatar.Image style={styles.commentAvatar} source={require('../assets/img.jpeg')}/>          
           <View style={styles.Profil}>
-                <Text style={styles.TextUsername}>{item.username}</Text>
-                <Text style={styles.TextTime}>2 jam</Text>
+                <Text style={styles.TextUsername}>{item.username}</Text>                
           </View>
             <Text style={styles.TextComment}>{item.comment}</Text>
       </View>      
   );
 
-const DetailPostActivity = () =>{
+const DetailPostActivity = ({route,navigation}) =>{
+    const [comment,setComment] = useState("");
+    const [listComment,setListComment] = useState([]);
+    const [username,setUserName] = useState("");
+    const {id} = route.params;
+    
+    useEffect(()=>{
+        database()
+        .ref('/users/' + auth().currentUser.uid + '/name')
+        .once('value')
+        .then((snapshot) => {          
+          setUserName(snapshot.val());
+        }); 
+        database()
+        .ref('/posts/'+id+"/postComment")
+        .on('value',comments=>{
+            const dataComments = [];
+            comments.forEach((snap)=>{
+                let child = snap.val();
+                dataComments.push({
+                    id:snap.child('').key,
+                    comment:child.comment,
+                    date:child.date,
+                    username:child.name
+                })
+            })            
+            setListComment(dataComments.reverse());            
+        })    
+    },[]);
     return(   
         <View style={styles.Container}>
-            <Card style={styles.CardContainer}>
-                <Card.Title title="Username" subtitle="Alamat" left={LeftContent} right={RightContent}/>        
-                <Card.Content>          
-                    <Paragraph>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ac hendrerit scelerisque pharetra, diam. Duis ac, molestie fringilla platea purus, duis feugiat pellentesque. </Paragraph>
-                </Card.Content>
-                    <Card.Cover source={{ uri: 'https://picsum.photos/700' }} />
-                <Card.Actions style={styles.CardAction}>                    
-                        <Text>10/10/2020</Text>
-                        <Button
-                        icon="thumb-up">77</Button>
-                        <Button
-                        icon="comment"
-                        >10</Button>                    
-                </Card.Actions>
-            </Card>
             <View style={styles.CommentContainer}>                
                     <FlatList
-                    data = {DATA}
+                    data = {listComment}
                     renderItem = {commentItem}
                     />                
             </View>
@@ -73,11 +81,14 @@ const DetailPostActivity = () =>{
                 style={styles.InputComment}
                 placeholder="comment"
                 mode="outlined"
+                value={comment}                                
+                onChangeText={comment =>setComment(comment)}
                 />               
                 <IconButton
                 icon="send"
                 color="white"
                 mode="contained"
+                onPress={()=> [postComment(id,comment,username),setComment('')]}
                 style={styles.ButtonSend}                
                 ></IconButton>
             </View>
@@ -104,7 +115,9 @@ const styles = StyleSheet.create({
     },
     comment:{
         padding:8,
-        flexDirection:"row"        
+        flexDirection:"row",
+        backgroundColor:"white",
+        marginVertical:6                
     },
     TextUsername:{
         fontWeight:"bold",
