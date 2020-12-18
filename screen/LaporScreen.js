@@ -131,13 +131,7 @@ class LaporActivity extends Component {
       Alert.alert('Ups', 'Gambar atau Caption belum terisi');
     } else {
       ToastAndroid.show('Mengunggah laporan..', ToastAndroid.SHORT);
-      await database()
-        .ref('/users/' + auth().currentUser.uid + '/name')
-        .once('value')
-        .then((snapshot) => {
-          console.log('User data: ', snapshot.val());
-          this.setUserName(snapshot.val());
-        });
+      await z
       const uploadUri = this.state.image;
       console.log(uploadUri);
       let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
