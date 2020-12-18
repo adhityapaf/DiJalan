@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,15 +19,12 @@ import {
 import styles from '../../app.styles';
 import Animated from 'react-native-reanimated';
 import BottomSheet from 'reanimated-bottom-sheet';
-import MapView, {Marker} from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
+import database from '@react-native-firebase/database';
 
-const App = ({navigation}) => {
-  const [region, setRegion] = useState({
-    latitude: -6.9782626,
-    longitude: 107.6302506,
-    latitudeDelta: 0.009,
-    longitudeDelta: 0.009,
-  });
+const App = ({ navigation }) => {
+
+  const [marker, setMarker] = useState([])
 
   const [camera, setCamera] = useState({
     center: {
@@ -44,13 +41,37 @@ const App = ({navigation}) => {
     zoom: 15,
   });
 
+  const getMarket = () => {
+    database()
+      .ref('posts/')
+      .once('value')
+      .then((snapshot) => {
+        // console.log('User data: ', snapshot.val());
+        setMarker([])
+        let mark = [];
+        snapshot.forEach(data => {
+          // if (data.child('postLat').val() && data.child('postLong').val()) {
+          // console.log(data.child('postLat'));
+          console.log(data.child('postLong'), "a");
+          mark.push({
+            latitude: data.child('postLat').val(),
+            longitude: data.child('postLong').val()
+          })
+          // }
+        })
+        setMarker(mark);
+        // console.log(marker) 
+      });
+  }
+
+
   const findCoordinates = () => {
     navigator.geolocation = require('@react-native-community/geolocation');
     navigator.geolocation.getCurrentPosition(
       (geo_success) => {
         // setLocation(geo_success);
-        console.log(geo_success.coords.latitude);
-        console.log(geo_success.coords.longitude);
+        // console.log(geo_success.coords.latitude);
+        // console.log(geo_success.coords.longitude);
 
         setCamera({
           center: {
@@ -64,7 +85,7 @@ const App = ({navigation}) => {
           altitude: 0,
 
           // Only when using Google Maps.
-          zoom: 15,
+          zoom: 17,
         });
       },
       (error) => Alert.alert(error.message),
@@ -72,15 +93,15 @@ const App = ({navigation}) => {
   };
 
   const renderInner = () => (
-    <View style={{backgroundColor: '#FFFFFF', padding: 20, height: '100%'}}>
+    <View style={{ backgroundColor: '#FFFFFF', padding: 20, height: '100%' }}>
       <Text
-        style={{justifyContent: 'center', alignSelf: 'center', fontSize: 16}}>
+        style={{ justifyContent: 'center', alignSelf: 'center', fontSize: 16 }}>
         Pilih Jenis Laporan
       </Text>
       <View style={styles.jenisLaporanContainer}>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('Lapor', {title: 'Lapor Jalan Rusak'});
+            navigation.navigate('Lapor', { title: 'Lapor Jalan Rusak' });
           }}>
           <View style={styles.jenisLaporanItems}>
             <Image
@@ -92,11 +113,11 @@ const App = ({navigation}) => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('Lapor', {title: 'Lapor Kecelakaan'});
+            navigation.navigate('Lapor', { title: 'Lapor Kecelakaan' });
           }}>
           <View style={styles.jenisLaporanItems}>
             <Image
-              style={{width: 54, height: 34}}
+              style={{ width: 54, height: 34 }}
               source={require('../../assets/car_accident_white.png')}
             />
             <Text style={styles.jenisLaporanLabel}>Kecelakaan</Text>
@@ -120,18 +141,22 @@ const App = ({navigation}) => {
 
   useEffect(() => {
     findCoordinates();
+    // getMarket();
   }, []);
 
   return (
     <View style={styles.welcome_container}>
       <MapView
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         showsUserLocation={true}
         followsUserLocation={true}
-        region={region}
-        camera={camera}
-        onRegionChangeComplete={(region) => setRegion(region)}>
-        {/* <Marker coordinate={{ latitude: 51.5078788, longitude: -0.0877321 }} /> */}
+        camera={camera}>
+        <Marker coordinate={{ latitude: -6.9771305, longitude: 107.6330418 }} />
+        <Marker coordinate={{ latitude: -6.9782626, longitude: 107.6302506 }} />
+        <Marker coordinate={{ latitude: -6.9771402, longitude: 107.6330448 }} />
+        {/* {marker.forEach(mark => console.log(mark.latitude + " dan " + mark.longitude) )} */}
+        {/* {marker.forEach(mark => <Marker coordinate={{ latitude: mark.latitude, longitude: mark.longitude }} /> )} */}
+        {/* {mapMarkers(marker)} */}
       </MapView>
       <View
         style={{
