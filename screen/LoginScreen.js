@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Image,
   ImageBackground,
+  Alert,
+  ToastAndroid,
 } from 'react-native';
 import {
   TextInput,
@@ -112,7 +114,7 @@ function LoginScreen({navigation}) {
                 }
               />
               <TouchableRipple
-                onPress={() => login(email, password)}
+                onPress={() => { email == '' || password == '' ? ToastAndroid.show('Email atau Password belum terisi', ToastAndroid.SHORT) : login(email, password)}}
                 style={styles.button}
                 rippleColor="rgba(0, 0, 0, .32)">
                 <Text style={styles.buttonText}>LOGIN</Text>
