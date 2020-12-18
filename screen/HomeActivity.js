@@ -9,7 +9,6 @@ import AccountScreen from './account/index';
 import LaporScreen from './LaporScreen';
 import MapsActivity from './maps/index'
 import { AuthContext } from '../navigation/AuthProvider';
-import MapsActivity from './maps/index';
 import Header from '../shared/header';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
