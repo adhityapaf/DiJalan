@@ -10,6 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@react-native-community/geolocation": "^2.0.2",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/bottom-tabs": "^5.11.2",
     "@react-navigation/material-bottom-tabs": "^5.3.10",
@@ -19,7 +20,9 @@
     "react": "16.13.1",
     "react-native": "0.63.4",
     "react-native-gesture-handler": "^1.9.0",
+    "react-native-google-places-autocomplete": "^2.1.2",
     "react-native-maps": "0.27.1",
+    "react-native-maps-directions": "^1.8.0",
     "react-native-material-textfield": "^0.16.1",
     "react-native-paper": "^4.4.1",
     "react-native-reanimated": "^1.13.2",
