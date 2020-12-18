@@ -33,14 +33,17 @@ const DATA = [
 
 const Item = () => {
   const navigation = useNavigation();
-  return( 
-    <TouchableWithoutFeedback onPress={() => navigation.navigate('Detail')}>
+  return(     
       <Card style={styles.CardContainer}>
       <Card.Title title="Username" subtitle="Alamat" left={LeftContent} right={RightContent}/>        
+      <TouchableWithoutFeedback onPress={() => navigation.navigate('Detail')}>
+        <View>
       <Card.Content>          
         <Paragraph>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ac hendrerit scelerisque pharetra, diam. Duis ac, molestie fringilla platea purus, duis feugiat pellentesque. </Paragraph>
       </Card.Content>
-      <Card.Cover source={{ uri: 'https://picsum.photos/700' }} />
+      <Card.Cover source={{ uri: 'https://picsum.photos/700' }} on />
+      </View>
+      </TouchableWithoutFeedback>   
       <Card.Actions>
           <View style={styles.CardAction}>
               <Text>10/10/2020</Text>
@@ -51,8 +54,7 @@ const Item = () => {
               >10</Button>
           </View>
       </Card.Actions>
-    </Card>
-    </TouchableWithoutFeedback>   
+    </Card>    
   )
 }
 

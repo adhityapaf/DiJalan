@@ -1,15 +1,12 @@
 import * as React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
+import {  
+  StyleSheet,  
   View,
   Text,  
   FlatList,  
 } from 'react-native';
 
 import {Button,IconButton,Card,Paragraph,Avatar,TextInput} from 'react-native-paper';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 
 const LeftContent = props => <Avatar.Image {...props} source={require('../assets/img.jpeg')}/>
@@ -56,24 +53,20 @@ const DetailPostActivity = () =>{
                     <Paragraph>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ac hendrerit scelerisque pharetra, diam. Duis ac, molestie fringilla platea purus, duis feugiat pellentesque. </Paragraph>
                 </Card.Content>
                     <Card.Cover source={{ uri: 'https://picsum.photos/700' }} />
-                <Card.Actions>
-                    <View style={styles.CardAction}>
+                <Card.Actions style={styles.CardAction}>                    
                         <Text>10/10/2020</Text>
                         <Button
                         icon="thumb-up">77</Button>
                         <Button
                         icon="comment"
-                        >10</Button>
-                    </View>
+                        >10</Button>                    
                 </Card.Actions>
             </Card>
-            <View style={styles.CommentContainer}>
-                <ScrollView>
+            <View style={styles.CommentContainer}>                
                     <FlatList
                     data = {DATA}
                     renderItem = {commentItem}
-                    />
-                </ScrollView>
+                    />                
             </View>
             <View style={styles.ContainerInputComment}>
                 <TextInput
@@ -98,8 +91,7 @@ const styles = StyleSheet.create({
         flex:1,
         backgroundColor:"#D3D3D3",                
     },
-    CardAction:{
-        flex:1,
+    CardAction:{        
         flexDirection:"row",
         justifyContent:"space-around",               
         alignItems:"center"

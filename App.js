@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, {Component} from 'react';
-import {View, Text} from 'react-native';
+import {View, Text,Image} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -10,6 +10,8 @@ import LaporScreen from './screen/LaporScreen';
 import HomeActivity from './screen/HomeActivity';
 import DetailActivity from './screen/DetailPostActivity';
 const Stack = createStackNavigator();
+
+
 
 class App extends Component {
   componentDidMount() {
@@ -43,9 +45,11 @@ class App extends Component {
             }}
           />
           <Stack.Screen
-          name="Home"
-          component={HomeActivity}
-          options={{headerShown: false}}
+          name="Main"
+          component={HomeActivity}   
+          options={{
+            headerShown:false
+          }}    
           />
           <Stack.Screen
           name="Detail"

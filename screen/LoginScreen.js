@@ -111,7 +111,7 @@ function LoginScreen({navigation}) {
                 }
               />
               <TouchableRipple
-                onPress={() => navigation.navigate('Home')}
+                onPress={() => navigation.navigate('Main')}
                 style={styles.button}
                 rippleColor="rgba(0, 0, 0, .32)">
                 <Text style={styles.buttonText}>LOGIN</Text>
