@@ -10,9 +10,9 @@ import {Button,IconButton,Card,Paragraph,Avatar,TextInput} from 'react-native-pa
 import database from '@react-native-firebase/database';
 import auth from '@react-native-firebase/auth';
 
-const postComment = (id,comment,username)=>{    
+const postComment = (ref,comment,username)=>{    
     database()
-    .ref('/posts/'+id+"/postComment")
+    .ref(ref)
     .push()
     .set({
         name:username,
@@ -42,9 +42,9 @@ const commentItem = ({item}) => (
 const DetailPostActivity = ({route,navigation}) =>{
     const [comment,setComment] = useState("");
     const [listComment,setListComment] = useState([]);
-    const [username,setUserName] = useState("");
-    const {id} = route.params;
-    
+    const [username,setUserName] = useState("");    
+    const {id,post} = route.params;
+    const ref = post+id+"/postComment";    
     useEffect(()=>{
         database()
         .ref('/users/' + auth().currentUser.uid + '/name')
@@ -53,7 +53,7 @@ const DetailPostActivity = ({route,navigation}) =>{
           setUserName(snapshot.val());
         }); 
         database()
-        .ref('/posts/'+id+"/postComment")
+        .ref(ref)
         .on('value',comments=>{
             const dataComments = [];
             comments.forEach((snap)=>{
@@ -88,7 +88,7 @@ const DetailPostActivity = ({route,navigation}) =>{
                 icon="send"
                 color="white"
                 mode="contained"
-                onPress={()=> [postComment(id,comment,username),setComment('')]}
+                onPress={()=> [postComment(ref,comment,username),setComment('')]}
                 style={styles.ButtonSend}                
                 ></IconButton>
             </View>

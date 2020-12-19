@@ -7,32 +7,12 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
   ToastAndroid,
-  Modal,
-  TouchableOpacity
+  Modal,  
 } from 'react-native';
 
-import {Button,IconButton,Colors,Icon,Card,List,Paragraph,Avatar} from 'react-native-paper';
+import {Button,IconButton,Card,Paragraph,Avatar} from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
-import BottomSheet from 'reanimated-bottom-sheet';
-import stylesCustom from '../app.styles';
-
-
-
-const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'First Item',
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Second Item',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571e29d72',
-      title: 'Third Item',
-    },
-  ];
 
 const postLike =((id,like)=>{
   let convertLike = like+1;
@@ -46,33 +26,30 @@ const postLike =((id,like)=>{
   );    
 })
 
-
-
 const JalanRusakjActivity = ({navigation})=>{    
   const [loading,setLoading] =useState(true);
   const [posts,setPosts] = useState([]);
   const [modal, setModal] = useState(false);
-
-  const LeftContent = props => <Avatar.Image {...props} source={require('../assets/img.jpeg')}/>
-const RightContent = props => <IconButton {...props} icon="dots-vertical" onPress={()=> setModal(true)}/>
 
   useEffect(()=>{    
     database().ref('posts/').on('value',data=>{
       const posts = [];
       data.forEach((snap)=>{
         let child = snap.val();        
-        let comment = snap.child('postComment').numChildren();                
+        let comment = snap.child('postComment').numChildren(); 
+        let {userName,userImage} = snap.child('postOwner').val();        
         posts.push({             
           id:snap.child('').key,                    
           caption:child.postCaption,
-          image:child.postImage,
-          owner:child.postOwner,
+          image:child.postImage,          
           address:child.postAddress,
           date:child.postDate,
           like:child.postLike,
-          comment:comment          
-        })      
-    })                  
+          comment:comment,
+          username:userName,
+          userimage:userImage          
+        });
+    });                 
       setPosts(posts.reverse());      
       setLoading(false);            
     });  
@@ -82,17 +59,17 @@ const RightContent = props => <IconButton {...props} icon="dots-vertical" onPres
 
   if(loading){
     return <ActivityIndicator size="large" color="#0984E3" />
-  }
-  const bottomContent = ()=>{
-    
-  }
-
+  }  
   const Item = ({post}) => {
     const navigation = useNavigation();
     return(     
         <Card style={styles.CardContainer}>
-        <Card.Title title={post.owner} subtitle={post.address} left={LeftContent} right={RightContent}/>        
-        <TouchableWithoutFeedback onPress={() => navigation.navigate('Detail',{"id":post.id})}>
+        <Card.Title 
+        title={post.username} 
+        subtitle={post.address} 
+        left={props => <Avatar.Image {...props} source={{ uri: post.userimage }}/>} 
+        right={props => <IconButton {...props} icon="dots-vertical" onPress={()=> setModal(true)}/>}/>        
+        <TouchableWithoutFeedback onPress={() => navigation.navigate('Detail',{"id":post.id,"post":"/posts/"})}>
           <View>
         <Card.Content>          
           <Paragraph>{post.caption} </Paragraph>
@@ -119,16 +96,7 @@ const RightContent = props => <IconButton {...props} icon="dots-vertical" onPres
         <Item post={item}/>
       )
   } 
-  const Bottom =()=>{
-    return(
-      <BottomSheet
-      ref={sheetRef}
-      snapPoints={[450, 300, 0]}
-      borderRadius={10}
-      renderContent={bottomContent}
-    />  
-    )
-  }
+
     return (    
       <View style={styles.Container}>          
         <>
