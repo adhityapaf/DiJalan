@@ -17,11 +17,8 @@ import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 import storage from '@react-native-firebase/storage';
 import ImagePickerCrop from 'react-native-image-crop-picker';
+import {useNavigation} from '@react-navigation/native';
 import styles from '../../app.styles';
-
-
-
-
 
 const EditProfile = () => {
   const [nama, setName] = useState('');
@@ -71,61 +68,72 @@ const EditProfile = () => {
       );
     } else {
       return (
-          <Image
-            source={{uri: image}}
-            style={{width: 150, height: 150, borderRadius: 150 / 2}}
-          />
-        );
+        <Image
+          source={{uri: image}}
+          style={{width: 150, height: 150, borderRadius: 150 / 2}}
+        />
+      );
+    }
+  };
+  function nav() {
+    console.log('Ini kepanggil');
+    const navigation = useNavigation().navigate('Home');
+  }
+  const saveProfile = async () => {
+    ToastAndroid.show('Menyimpan Profile..', ToastAndroid.SHORT);
+    const uploadUri = image;
+    console.log(uploadUri);
+    let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+    // nambahin timestamp ke nama file
+    const extension = filename.split('.').pop();
+    const name = filename.split('.').slice(0, -1).join('.');
+    filename = name + Date.now() + '.' + extension;
+    setUploading(true);
+    setDisabled(true);
+    setTransferred(0);
+    const ref = storage().ref('userImage/' + filename);
+    const task = ref.putFile(uploadUri);
+    task.on('state_changed', (taskSnapshot) => {
+      console.log(
+        `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+      );
+      setTransferred(
+        Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
+          100,
+      );
+    });
+    try {
+      await task;
+      const urlImage = await ref.getDownloadURL();
+      const reference = await database()
+        .ref('/users/' + auth().currentUser.uid)
+        .update({
+          name: nama,
+          userImage: urlImage,
+          noHp: noHandphone,
+          bio: bio,
+        })
+        .then(() => console.log('User updated'));
+      setUploading(false);
+      setDisabled(false);
+      // Alert.alert(
+      //   'Update Profile',
+      //   'Profile berhasil di update!',
+      //   [{text: 'OK', onPress: () => navigation.navigate('Home')}],
+      //   {cancelable: false},
+      // );
+      ToastAndroid.show('Berhasil update!', ToastAndroid.SHORT);
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  const saveProfile = async() => {
-      ToastAndroid.show('Menyimpan Profile..', ToastAndroid.SHORT);
-      const uploadUri = image;
-      console.log(uploadUri);
-      let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
-      // nambahin timestamp ke nama file
-      const extension = filename.split('.').pop();
-      const name = filename.split('.').slice(0, -1).join('.');
-      filename = name + Date.now() + '.' + extension;
-      setUploading(true);
-      setDisabled(true);
-      setTransferred(0);
-      const ref = storage().ref('userImage/'+filename);
-      const task = ref.putFile(uploadUri);
-      task.on('state_changed', (taskSnapshot) => {
-        console.log(
-          `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
-        );
-        setTransferred(
-          Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
-            100,
-        );
-      });
-      try {
-          await task;
-          const urlImage = await ref.getDownloadURL();
-          const reference = await database().ref('/users/'+auth().currentUser.uid)
-          .update({
-              name: nama,
-              userImage: urlImage,
-              noHp: noHandphone,
-              bio: bio
-          }).then(() => console.log('User updated'))
-          setUploading(false);
-          setDisabled(false);
-          Alert.alert('Update Profile', 'Profile berhasil di update!',
-          [{text: 'OK', onPress: () => navigation.navigate('Home')}],
-          {cancelable: false},
-          );
-      } catch (error) {
-          console.log(error);
-      }
-
-  }
-
   useEffect(() => {
-      ToastAndroid.show('Memuat data user..', ToastAndroid.SHORT, ToastAndroid.CENTER);
+    ToastAndroid.show(
+      'Memuat data user..',
+      ToastAndroid.SHORT,
+      ToastAndroid.CENTER,
+    );
     const data = database()
       .ref('/users/' + auth().currentUser.uid)
       .once('value')
@@ -197,11 +205,16 @@ const EditProfile = () => {
             value={bio}
             onChangeText={(bio) => setBio(bio)}
           />
-          <Button mode="contained" style={{marginTop: 8}} color="#0984E3" disabled={disabled} onPress={() => saveProfile()}>
+          <Button
+            mode="contained"
+            style={{marginTop: 8}}
+            color="#0984E3"
+            disabled={disabled}
+            onPress={() => saveProfile()}>
             SAVE
           </Button>
           {uploading ? (
-              <View style={{justifyContent: 'center', alignItems: 'center'}}>
+            <View style={{justifyContent: 'center', alignItems: 'center'}}>
               <Text>{transferred} % Completed!</Text>
               <ActivityIndicator size="large" color="#0984E3" />
             </View>
@@ -226,7 +239,6 @@ const EditProfile = () => {
           <Button mode="contained" style={{marginTop: 8}} color="#0984E3">
             SAVE
           </Button> */}
-
         </View>
         <Modal
           animationType="fade"
