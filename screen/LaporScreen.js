@@ -49,7 +49,8 @@ class LaporActivity extends Component {
       userName: '',
       userLat: '',
       userLong: '',
-      header: ''
+      header: '',
+      userImage: ''
     };
   }
   
@@ -85,6 +86,9 @@ class LaporActivity extends Component {
   };
   setUserLong = (text) => {
     this.setState({userLong: text});
+  };
+  setUserImage = (text) => {
+    this.setState({userImage: text});
   };
 
   takePhotoFromCamera = () => {
@@ -163,11 +167,12 @@ class LaporActivity extends Component {
     } else {
       ToastAndroid.show('Mengunggah laporan..', ToastAndroid.SHORT);
       await database()
-        .ref('/users/' + auth().currentUser.uid + '/name')
+        .ref('/users/' + auth().currentUser.uid)
         .once('value')
         .then((snapshot) => {
           console.log('User data: ', snapshot.val());
-          this.setUserName(snapshot.val());
+          this.setUserName(snapshot.child('name').val());
+          this.setUserImage(snapshot.child('userImage').val());
         });
       const uploadUri = this.state.image;
       console.log(uploadUri);
@@ -197,14 +202,17 @@ class LaporActivity extends Component {
         console.log('Child Key ' + reference.key);
         await reference
           .set({
-            postOwner: this.state.userName,
+            postOwner: {
+              userName: this.state.userName,
+              userImage: this.state.userImage
+            },
             postImage: urlImage,
             postCaption: this.state.caption,
             postDate: getCurrentDate(),
             postAddress: '',
             postLike: 0,
             postLat: this.state.userLat,
-            postLong: this.state.userLong
+            postLong: this.state.userLong,
           })
           .then(() => console.log('Post Data set.'));
         } else if (laporan == "Lapor Kecelakaan"){
