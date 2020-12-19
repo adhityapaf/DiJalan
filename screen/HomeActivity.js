@@ -16,8 +16,6 @@ const Stack = createStackNavigator();
 
 
 function MainActivity() {
-  const {user} = useContext(AuthContext);
-  console.log(user.id);
   return (
       <Tab.Navigator>
         <Tab.Screen
