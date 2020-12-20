@@ -5,7 +5,7 @@ import {
   Text,  
   FlatList,  
   ActivityIndicator,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   ToastAndroid,
   Modal
 } from 'react-native';
@@ -13,6 +13,8 @@ import {
 import {Button,IconButton,Card,Paragraph,Avatar} from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
+import ReadMore from 'react-native-read-more-text';
+import ImageViewer from 'react-native-image-zoom-viewer';
   
 const postLike =((id,like)=>{
   let convertLike = like+1;
@@ -30,6 +32,8 @@ const KecelakaanActivity = ({navigation})=>{
   const[loading,setLoading] = useState(true);
   const[posts,setPosts] = useState([]);
   const[modal,setModal] = useState(false);
+  const [previewImage,setPreviewImage] = useState("");
+  const [modalImage,setModalImage] = useState(false);
 
   const getPostKecelakaan = ()=>{
     database().ref('posts_kecelakaan/').on('value',data=>{
@@ -58,38 +62,46 @@ const KecelakaanActivity = ({navigation})=>{
   useEffect(()=>{
     getPostKecelakaan();
   },[]);
-  const sheetRef = React.useRef(null);
+  const viewImage = ((data)=>{
+    console.log(data);
+    setPreviewImage(data);
+    setModalImage(true);
+  });
   if(loading){
     return <ActivityIndicator size="large" color="#0984E3" />
   }  
   const Item = ({post}) => {
     const navigation = useNavigation();
     return(     
-        <Card style={styles.CardContainer}>
-        <Card.Title 
-        title={post.username} 
-        subtitle={post.address} 
-        left={props => <Avatar.Image {...props} source={{ uri: post.userimage }}/>} 
-        right={props => <IconButton {...props} icon="dots-vertical" onPress={()=> setModal(true)}/>}/>              
-        <TouchableWithoutFeedback onPress={() => navigation.navigate('Detail',{"id":post.id , "post":"/posts_kecelakaan/"})}>
+      <Card style={styles.CardContainer}>
+        <Card.Title
+          title={post.username}
+          subtitle={post.address}
+          left={props => <Avatar.Image {...props} source={{ uri: post.userimage }} />}
+          right={props => <IconButton {...props} icon="dots-vertical" onPress={() => setModal(true)} />} />        
           <View>
-        <Card.Content>          
-          <Paragraph>{post.caption} </Paragraph>
-        </Card.Content>
-        <Card.Cover source={{ uri: post.image }} on />
-        </View>
-        </TouchableWithoutFeedback>   
+            <Card.Content>     
+              <ReadMore
+              numberOfLines={2}>
+                {post.caption}                 
+                </ReadMore>
+            </Card.Content>
+            <TouchableOpacity onPress={()=> viewImage(post.image)}>
+              <Card.Cover source={{ uri: post.image }}/>
+            </TouchableOpacity>
+          </View>        
         <Card.Actions>
-            <View style={styles.CardAction}>
-                <Text>{post.date}</Text>
-                <Button
-                icon="thumb-up" onPress={()=> postLike(post.id,post.like)}>{post.like}</Button>
-                <Button
-                icon="comment"
-                >{post.comment}</Button>
-            </View>
+          <View style={styles.CardAction}>
+            <Text>{post.date}</Text>
+            <Button
+              icon="thumb-up" onPress={() => postLike(post.id, post.like)}>{post.like}</Button>
+            <Button
+              icon="comment"
+              onPress={() => navigation.navigate('Detail', { "id": post.id, "post": "/posts/" })}
+            >{post.comment}</Button>
+          </View>
         </Card.Actions>
-      </Card>    
+      </Card>   
     )
   }
   
@@ -134,7 +146,26 @@ const KecelakaanActivity = ({navigation})=>{
               >Mengandung Kekerasa</Button>              
             </View>
           </View>
-        </Modal>  
+        </Modal> 
+        <Modal
+      animationType="fade"
+      transparent={false}
+      visible={modalImage}
+      onRequestClose={()=>{setModalImage(false)} }>     
+        <View
+          style={styles.container_view}>
+            <IconButton 
+            style={styles.view_close_button}
+            icon="close"
+            color="red"
+            size={30}
+            onPress={()=> setModalImage(false)}/>
+             <ImageViewer
+              style={styles.view_image}
+              imageUrls={[{url:previewImage}]}
+            />   
+        </View>
+      </Modal> 
         </View>
     )
 }
@@ -176,6 +207,18 @@ const styles = StyleSheet.create({
     },
     buttomButton:{
       width:"100%",  
+    }  ,
+    container_view:{
+      flex:1,
+      justifyContent:'center',  
+      backgroundColor:"black"
+    },
+    view_image:{              
+      alignContent:'center',    
+    },
+    view_close_button:{
+      alignSelf:'flex-end',
+      backgroundColor:"white"    
     }  
 })
 
