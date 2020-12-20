@@ -26,6 +26,9 @@ import { useNavigation } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
 import auth from '@react-native-firebase/auth';
 
+import gcpConfig from "../service/gcp/config";
+import Geocoder from 'react-native-geocoding';
+
 const theme = {
   ...DefaultTheme,
   roundness: 2,
@@ -49,7 +52,8 @@ class LaporActivity extends Component {
       userLat: '',
       userLong: '',
       header: '',
-      userImage: ''
+      userImage: '',
+      address: '',
     };
   }
 
@@ -88,6 +92,9 @@ class LaporActivity extends Component {
   };
   setUserImage = (text) => {
     this.setState({ userImage: text });
+  };
+  setAddress = (text) => {
+    this.setState({ address: text });
   };
 
   takePhotoFromCamera = () => {
@@ -142,6 +149,16 @@ class LaporActivity extends Component {
         console.log(geo_success.coords.longitude);
         this.setUserLat(geo_success.coords.latitude);
         this.setUserLong(geo_success.coords.longitude);
+
+        Geocoder.init(gcpConfig.API_KEY);
+
+        Geocoder.from(geo_success.coords.latitude, geo_success.coords.longitude)
+          .then(json => {
+            let address = json.results[0].formatted_address;
+            // console.log(address);
+            this.setAddress(address);
+          })
+          .catch(error => console.warn(error));
       },
       (error) => Alert.alert(error.message),
     );
@@ -211,7 +228,7 @@ class LaporActivity extends Component {
               postImage: urlImage,
               postCaption: this.state.caption,
               postDate: getCurrentDate(),
-              postAddress: '',
+              postAddress: this.state.address,
               postLike: 0,
               postLat: this.state.userLat,
               postLong: this.state.userLong,
@@ -226,7 +243,7 @@ class LaporActivity extends Component {
               postImage: urlImage,
               postCaption: this.state.caption,
               postDate: getCurrentDate(),
-              postAddress: '',
+              postAddress: this.state.address,
               postLike: 0,
               postLat: this.state.userLat,
               postLong: this.state.userLong
