@@ -1,5 +1,4 @@
-import React, {Component, Fragment} from 'react';
-import {useState} from 'react';
+import React, { Component, Fragment, useState } from 'react';
 import {
   View,
   Text,
@@ -20,12 +19,15 @@ import {
 } from 'react-native-paper';
 import styles from '../app.styles';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import ImagePicker, {launchCamera} from 'react-native-image-picker';
+import ImagePicker, { launchCamera } from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
 import ImagePickerCrop from 'react-native-image-crop-picker';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
 import auth from '@react-native-firebase/auth';
+
+import gcpConfig from "../service/gcp/config";
+import Geocoder from 'react-native-geocoding';
 
 const theme = {
   ...DefaultTheme,
@@ -50,45 +52,49 @@ class LaporActivity extends Component {
       userLat: '',
       userLong: '',
       header: '',
-      userImage: ''
+      userImage: '',
+      address: '',
     };
   }
-  
+
   setHeader = (text) => {
-    this.setState({header: text});
+    this.setState({ header: text });
   }
 
   setModalVisible = (visible) => {
-    this.setState({modalVisible: visible});
+    this.setState({ modalVisible: visible });
   };
 
   handleCaption = (text) => {
-    this.setState({caption: text});
+    this.setState({ caption: text });
   };
 
   handleImage = (text) => {
-    this.setState({image: text});
+    this.setState({ image: text });
   };
 
   setUploading = (text) => {
-    this.setState({uploading: text});
+    this.setState({ uploading: text });
   };
 
   setTransferred = (number) => {
-    this.setState({transferred: number});
+    this.setState({ transferred: number });
   };
 
   setUserName = (text) => {
-    this.setState({userName: text});
+    this.setState({ userName: text });
   };
   setUserLat = (text) => {
-    this.setState({userLat: text});
+    this.setState({ userLat: text });
   };
   setUserLong = (text) => {
-    this.setState({userLong: text});
+    this.setState({ userLong: text });
   };
   setUserImage = (text) => {
-    this.setState({userImage: text});
+    this.setState({ userImage: text });
+  };
+  setAddress = (text) => {
+    this.setState({ address: text });
   };
 
   takePhotoFromCamera = () => {
@@ -122,14 +128,14 @@ class LaporActivity extends Component {
       return (
         <Image
           source={require('../assets/placeholder-image.png')}
-          style={{height: 202, width: 422, alignSelf: 'stretch'}}
+          style={{ height: 202, width: 422, alignSelf: 'stretch' }}
         />
       );
     } else {
       return (
         <Image
-          source={{uri: this.state.image}}
-          style={{height: 202, alignSelf: 'stretch'}}
+          source={{ uri: this.state.image }}
+          style={{ height: 202, alignSelf: 'stretch' }}
         />
       );
     }
@@ -143,18 +149,29 @@ class LaporActivity extends Component {
         console.log(geo_success.coords.longitude);
         this.setUserLat(geo_success.coords.latitude);
         this.setUserLong(geo_success.coords.longitude);
+
+        Geocoder.init(gcpConfig.API_KEY);
+
+        Geocoder.from(geo_success.coords.latitude, geo_success.coords.longitude)
+          .then(json => {
+            let address = json.results[0].formatted_address;
+            // console.log(address);
+            this.setAddress(address);
+          })
+          .catch(error => console.warn(error));
       },
       (error) => Alert.alert(error.message),
     );
   };
   submitAction = async () => {
-    const {navigation} = this.props;
-    const {route} = this.props;
-    const {title } = route.params;
+    const { navigation } = this.props;
+    const { route } = this.props;
+    const { title } = route.params;
     let jenisLaporan = JSON.stringify(title);
-    let laporan = jenisLaporan.replace('"','').replace('"','');
-    console.log("Jenis laporan : "+laporan);
+    let laporan = jenisLaporan.replace('"', '').replace('"', '');
+    console.log("Jenis laporan : " + laporan);
     this.findCoordinates();
+
     const getCurrentDate = () => {
       var date = new Date().getDate();
       var month = new Date().getMonth() + 1;
@@ -162,6 +179,7 @@ class LaporActivity extends Component {
 
       return date + '/' + month + '/' + year; //format: dd/mm/yyyy;
     };
+
     if (!this.state.caption || !this.state.image) {
       Alert.alert('Ups', 'Gambar atau Caption belum terisi');
     } else {
@@ -191,7 +209,7 @@ class LaporActivity extends Component {
         );
         this.setTransferred(
           Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
-            100,
+          100,
         );
       });
       try {
@@ -199,35 +217,40 @@ class LaporActivity extends Component {
         const urlImage = await ref.getDownloadURL();
         if (laporan == "Lapor Jalan Rusak") {
           const reference = await database().ref('/posts/').push();
-        console.log('Child Key ' + reference.key);
-        await reference
+          console.log('Child Key ' + reference.key);
+          await reference
+            .set({
+              postOwner: {
+                userName: this.state.userName,
+                userImage: this.state.userImage,
+                userID: auth().currentUser.uid,
+              },
+              postImage: urlImage,
+              postCaption: this.state.caption,
+              postDate: getCurrentDate(),
+              postAddress: this.state.address,
+              postLike: 0,
+              postLat: this.state.userLat,
+              postLong: this.state.userLong,
+            })
+            .then(() => console.log('Post Data set.'));
+        } else if (laporan == "Lapor Kecelakaan") {
+          const reference = await database().ref('/posts_kecelakaan/').push();
+          console.log('Child Key ' + reference.key);
+          await reference
           .set({
             postOwner: {
               userName: this.state.userName,
-              userImage: this.state.userImage
+              userImage: this.state.userImage,
+              userID: auth().currentUser.uid,
             },
             postImage: urlImage,
             postCaption: this.state.caption,
             postDate: getCurrentDate(),
-            postAddress: '',
+            postAddress: this.state.address,
             postLike: 0,
             postLat: this.state.userLat,
             postLong: this.state.userLong,
-          })
-          .then(() => console.log('Post Data set.'));
-        } else if (laporan == "Lapor Kecelakaan"){
-          const reference = await database().ref('/posts_kecelakaan/').push();
-        console.log('Child Key ' + reference.key);
-        await reference
-          .set({
-            postOwner: this.state.userName,
-            postImage: urlImage,
-            postCaption: this.state.caption,
-            postDate: getCurrentDate(),
-            postAddress: '',
-            postLike: 0,
-            postLat: this.state.userLat,
-            postLong: this.state.userLong
           })
           .then(() => console.log('Post Data set.'));
         }
@@ -235,8 +258,8 @@ class LaporActivity extends Component {
         Alert.alert(
           'Gambar Berhasil di Upload!',
           'Gambar sudah berada di cloud~',
-          [{text: 'OK', onPress: () => navigation.navigate('Home')}],
-          {cancelable: false},
+          [{ text: 'OK', onPress: () => navigation.navigate('Home') }],
+          { cancelable: false },
         );
       } catch (error) {
         console.log(error);
@@ -247,14 +270,14 @@ class LaporActivity extends Component {
   };
 
   render() {
-    const {modalVisible} = this.state;
-    const {uploading} = this.state;
+    const { modalVisible } = this.state;
+    const { uploading } = this.state;
 
     return (
       <PaperProvider theme={theme}>
         <View>
           {this.renderImage()}
-          <View style={{padding: 20}}>
+          <View style={{ padding: 20 }}>
             <TouchableRipple
               onPress={() => this.setModalVisible(true)}
               style={styles.button}
@@ -274,18 +297,18 @@ class LaporActivity extends Component {
               onChangeText={this.handleCaption}
             />
             {uploading ? (
-              <View style={{justifyContent: 'center', alignItems: 'center'}}>
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <Text>{this.state.transferred} % Completed!</Text>
                 <ActivityIndicator size="large" color="#0984E3" />
               </View>
             ) : (
-              <TouchableRipple
-                onPress={() => this.submitAction()}
-                style={styles.button}
-                rippleColor="rgba(0, 0, 0, .32)">
-                <Text style={styles.buttonText}>Submit</Text>
-              </TouchableRipple>
-            )}
+                <TouchableRipple
+                  onPress={() => this.submitAction()}
+                  style={styles.button}
+                  rippleColor="rgba(0, 0, 0, .32)">
+                  <Text style={styles.buttonText}>Submit</Text>
+                </TouchableRipple>
+              )}
           </View>
           <Modal
             animationType="fade"

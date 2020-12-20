@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import { useNavigation } from '@react-navigation/native';
 
 import {
   Image,
@@ -17,10 +18,10 @@ import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 import storage from '@react-native-firebase/storage';
 import ImagePickerCrop from 'react-native-image-crop-picker';
-import {useNavigation} from '@react-navigation/native';
 import styles from '../../app.styles';
 
 const EditProfile = () => {
+  const navigation = useNavigation();
   const [nama, setName] = useState('');
   const [noHandphone, setNoHandphone] = useState('');
   const [email, setEmail] = useState('');
@@ -59,10 +60,10 @@ const EditProfile = () => {
   };
 
   const renderImage = () => {
-    if (image == '') {
+    if (image == null || image == '') {
       return (
         <Image
-          source={require('../../assets/image_female.png')}
+          source={require('../../assets/place-holder.png')}
           style={{width: 150, height: 150, borderRadius: 150 / 2}}
         />
       );

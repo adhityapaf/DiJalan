@@ -1,5 +1,5 @@
-import {useNavigation} from '@react-navigation/native';
-import React, {useState, useContext, useEffect} from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useState, useContext, useEffect } from 'react';
 
 import {
   Image,
@@ -7,17 +7,17 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  ToastAndroid,
+  Dimensions,
   FlatList,
 } from 'react-native';
-import {Card, Button, Paragraph, Avatar, IconButton} from 'react-native-paper';
-import {AuthContext} from '../../navigation/AuthProvider';
+import { Card, Button, Paragraph, Avatar, IconButton } from 'react-native-paper';
+import { AuthContext } from '../../navigation/AuthProvider';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
+import ReadMore from 'react-native-read-more-text';
 
-const LeftContent = (props) => (
-  <Avatar.Image {...props} source={require('../../assets/image_female.png')} />
-);
-const RightContent = (props) => <IconButton {...props} icon="dots-vertical" />;
+const { width, height } = Dimensions.get('window');
 
 const fetchUser = async () => {
   await database()
@@ -28,6 +28,18 @@ const fetchUser = async () => {
       return snapshot.val();
     });
 };
+
+const postLike = ((id, like) => {
+  let convertLike = like + 1;
+  database()
+    .ref('/posts/' + id)
+    .update({
+      postLike: convertLike,
+    })
+    .then(
+      ToastAndroid.show('Berhasil Like', ToastAndroid.SHORT)
+    );
+})
 
 const DATA = [
   {
@@ -46,45 +58,80 @@ const DATA = [
   },
 ];
 
-const PostItem = ({item}) => {
-  return (
-    <Card style={styles.CardContainer}>
-      <Card.Title
-        title={item.title}
-        subtitle="Alamat"
-        left={LeftContent}
-        right={RightContent}
-      />
-      <Card.Content>
-        <Paragraph>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ac hendrerit
-          scelerisque pharetra, diam. Duis ac, molestie fringilla platea purus,
-          duis feugiat pellentesque.{' '}
-        </Paragraph>
-      </Card.Content>
-      <Card.Cover source={{uri: 'https://picsum.photos/700'}} />
-      <Card.Actions>
-        <View style={styles.CardAction}>
-          <Text>{item.date}</Text>
-          <Button icon="thumb-up">{item.like}</Button>
-          <Button icon="comment">{item.comment}</Button>
-        </View>
-      </Card.Actions>
-    </Card>
-  );
-};
-
 function AccountScreen() {
   const navigation = useNavigation();
   const [username, setUsername] = useState('Loading Nama..');
   const [bio, setBio] = useState('Loading Bio...');
   const [userImage, setUserImage] = useState('');
-  const {logout} = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
+
+  const [posts, setPosts] = useState([]);
+
+  const PostItem = ({ item }) => {
+    return (
+      <Card style={styles.CardContainer}>
+        {userImage == null || userImage == '' ?
+          <Card.Title
+            title={item.username}
+            subtitle={item.address}
+            left={props => <Avatar.Image {...props} source={require('../../assets/place-holder.png')} />}            
+          />
+          :
+          <Card.Title
+            title={item.username}
+            subtitle={item.address}
+            left={props => <Avatar.Image {...props} source={{ uri: userImage }} />}            
+          />
+        }
+        <Card.Content>
+          <ReadMore
+            numberOfLines={2}>
+              {item.caption}
+          </ReadMore>
+        </Card.Content>
+        <Card.Cover source={{ uri: item.image }} />
+        <Card.Actions>
+          <View style={styles.CardAction}>
+            <Text>{item.date}</Text>
+            <Button icon="thumb-up">{item.like}</Button>
+            <Button icon="comment">{item.comment}</Button>
+          </View>
+        </Card.Actions>
+      </Card>
+    );
+  };
+
+  const getPost = () => {
+    database().ref('posts/').on('value', data => {
+      const posts = [];
+      data.forEach((snap) => {
+        if (snap.child('postOwner').child('userID').exists() && snap.child('postOwner').child('userID').val() == auth().currentUser.uid) {
+          let child = snap.val();
+          let comment = snap.child('postComment').numChildren();
+          let { userName, userImage } = snap.child('postOwner').val();
+          console.log(`woy ${userName}`);
+
+          posts.push({
+            id: snap.child('').key,
+            caption: child.postCaption,
+            image: child.postImage,
+            address: child.postAddress,
+            date: child.postDate,
+            like: child.postLike,
+            comment: comment,
+            username: userName,
+            userimage: userImage
+          });
+        }
+      });
+      setPosts(posts.reverse());
+    });
+  }
+
   useEffect(() => {
     const data = database()
       .ref('/users/' + auth().currentUser.uid)
-      .once('value')
-      .then((snapshot) => {
+      .on('value', snapshot => {
         console.log('Username : ', snapshot.child('name').val());
         setUsername(snapshot.child('name').val());
         setUserImage(snapshot.child('userImage').val());
@@ -97,27 +144,29 @@ function AccountScreen() {
           }
         }
       });
+
+    getPost();
   }, []);
   const renderImage = () => {
-    if (userImage == '') {
+    if (userImage == null || userImage == '') {
       return (
         <Image
-          source={require('../../assets/image_female.png')}
-          style={{width: 85, height: 85, borderRadius: 85 / 2}}
+          source={require('../../assets/place-holder.png')}
+          style={{ width: 85, height: 85, borderRadius: 85 / 2 }}
         />
       );
     } else {
       return (
         <Image
-          source={{uri: userImage}}
-          style={{width: 85, height: 85, borderRadius: 85 / 2}}
+          source={{ uri: userImage }}
+          style={{ width: 85, height: 85, borderRadius: 85 / 2 }}
         />
       );
     }
   };
 
   return (
-    <View style={{flex: 1, flexDirection: 'column', alignItems: 'center'}}>
+    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center' }}>
       <View
         style={{
           flex: 2,
@@ -126,7 +175,7 @@ function AccountScreen() {
           padding: 24,
           backgroundColor: '#FFFFFF',
         }}>
-        <View style={{flex: 0.8, flexDirection: 'row', alignSelf: 'stretch'}}>
+        <View style={{ flex: 0.8, flexDirection: 'row', alignSelf: 'stretch' }}>
           {renderImage()}
           <View
             style={{
@@ -135,25 +184,25 @@ function AccountScreen() {
               alignSelf: 'stretch',
               marginLeft: 16,
             }}>
-            <Text style={{color: '#000000', fontSize: 18, fontWeight: 'bold'}}>
+            <Text style={{ color: '#000000', fontSize: 18, fontWeight: 'bold' }}>
               {username}
             </Text>
-            <Text style={{color: '#000000', fontSize: 12, marginTop: 4}}>
+            <Text style={{ color: '#000000', fontSize: 12, marginTop: 4 }}>
               {bio}
             </Text>
           </View>
         </View>
-        <View style={{flex: 1, flexDirection: 'column'}}>
+        <View style={{ flex: 1, flexDirection: 'column' }}>
           <Button
             mode="contained"
-            style={{marginTop: 20}}
+            style={{ marginTop: 20 }}
             color="#0984E3"
             onPress={() => navigation.navigate('EditProfile')}>
             EDIT PROFILE
           </Button>
           <Button
             mode="contained"
-            style={{marginTop: 20}}
+            style={{ marginTop: 20 }}
             color="#0984E3"
             onPress={() => logout()}>
             Logout
@@ -162,7 +211,7 @@ function AccountScreen() {
       </View>
 
       <View style={styles.Container}>
-        <FlatList data={DATA} renderItem={PostItem} />
+        <FlatList data={posts} renderItem={PostItem} />
       </View>
     </View>
   );
@@ -181,6 +230,7 @@ const styles = StyleSheet.create({
   },
   CardContainer: {
     marginTop: 16,
+    width: width,
   },
 });
 
