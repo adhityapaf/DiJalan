@@ -70,7 +70,7 @@ class App extends React.Component {
           <Stack.Screen
             name="EditProfile"
             component={EditProfile}
-            options={{ headerShown: false }}
+            options={{ headerShown: true }}
           />
 
           <Stack.Screen

@@ -238,17 +238,21 @@ class LaporActivity extends Component {
           const reference = await database().ref('/posts_kecelakaan/').push();
           console.log('Child Key ' + reference.key);
           await reference
-            .set({
-              postOwner: this.state.userName,
-              postImage: urlImage,
-              postCaption: this.state.caption,
-              postDate: getCurrentDate(),
-              postAddress: this.state.address,
-              postLike: 0,
-              postLat: this.state.userLat,
-              postLong: this.state.userLong
-            })
-            .then(() => console.log('Post Data set.'));
+          .set({
+            postOwner: {
+              userName: this.state.userName,
+              userImage: this.state.userImage,
+              userID: auth().currentUser.uid,
+            },
+            postImage: urlImage,
+            postCaption: this.state.caption,
+            postDate: getCurrentDate(),
+            postAddress: this.state.address,
+            postLike: 0,
+            postLat: this.state.userLat,
+            postLong: this.state.userLong,
+          })
+          .then(() => console.log('Post Data set.'));
         }
         this.setUploading(false);
         Alert.alert(

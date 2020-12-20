@@ -131,8 +131,7 @@ function AccountScreen() {
   useEffect(() => {
     const data = database()
       .ref('/users/' + auth().currentUser.uid)
-      .once('value')
-      .then((snapshot) => {
+      .on('value', snapshot => {
         console.log('Username : ', snapshot.child('name').val());
         setUsername(snapshot.child('name').val());
         setUserImage(snapshot.child('userImage').val());
