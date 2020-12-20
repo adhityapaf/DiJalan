@@ -15,13 +15,9 @@ import { Card, Button, Paragraph, Avatar, IconButton } from 'react-native-paper'
 import { AuthContext } from '../../navigation/AuthProvider';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
+import ReadMore from 'react-native-read-more-text';
 
 const { width, height } = Dimensions.get('window');
-
-const LeftContent = (props) => (
-  <Avatar.Image {...props} source={require('../../assets/image_female.png')} />
-);
-const RightContent = (props) => <IconButton {...props} icon="dots-vertical" />;
 
 const fetchUser = async () => {
   await database()
@@ -73,32 +69,31 @@ function AccountScreen() {
 
   const PostItem = ({ item }) => {
     return (
-      <Card style={styles.CardContainer} onPress={() => navigation.navigate('Detail', { "id": item.id, "post": "/posts/" })}>
+      <Card style={styles.CardContainer}>
         {userImage == null || userImage == '' ?
           <Card.Title
             title={item.username}
             subtitle={item.address}
-            left={props => <Avatar.Image {...props} source={require('../../assets/place-holder.png')} />}
-            right={RightContent}
+            left={props => <Avatar.Image {...props} source={require('../../assets/place-holder.png')} />}            
           />
           :
           <Card.Title
             title={item.username}
             subtitle={item.address}
-            left={props => <Avatar.Image {...props} source={{ uri: userImage }} />}
-            right={RightContent}
+            left={props => <Avatar.Image {...props} source={{ uri: userImage }} />}            
           />
         }
         <Card.Content>
-          <Paragraph>
-            {item.caption}
-          </Paragraph>
+          <ReadMore
+            numberOfLines={2}>
+              {item.caption}
+          </ReadMore>
         </Card.Content>
         <Card.Cover source={{ uri: item.image }} />
         <Card.Actions>
           <View style={styles.CardAction}>
             <Text>{item.date}</Text>
-            <Button icon="thumb-up" onPress={() => postLike(item.id, item.like)}>{item.like}</Button>
+            <Button icon="thumb-up">{item.like}</Button>
             <Button icon="comment">{item.comment}</Button>
           </View>
         </Card.Actions>

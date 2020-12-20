@@ -61,8 +61,7 @@ const JalanRusakjActivity = ({ navigation }) => {
   }, []);
   
 
-  const viewImage = ((data)=>{
-    console.log(data);
+  const viewImage = ((data)=>{    
     setPreviewImage(data);
     setModalImage(true);
   });
@@ -73,11 +72,19 @@ const JalanRusakjActivity = ({ navigation }) => {
     const navigation = useNavigation();
     return (
       <Card style={styles.CardContainer}>
-        <Card.Title
-          title={post.username}
-          subtitle={post.address}
-          left={props => <Avatar.Image {...props} source={{ uri: post.userimage }} />}
-          right={props => <IconButton {...props} icon="dots-vertical" onPress={() => setModal(true)} />} />        
+           {post.userImage == null || post.userImage == '' ?
+          <Card.Title
+            title={post.username}
+            subtitle={post.address}
+            left={props => <Avatar.Image {...props} source={require('../assets/place-holder.png')} />}
+            right={props => <IconButton {...props} icon="dots-vertical" onPress={() => setModal(true)} />} />        
+          :
+          <Card.Title
+            title={item.username}
+            subtitle={item.address}
+            left={props => <Avatar.Image {...props} source={{ uri: post.userImage }} />}
+            right={props => <IconButton {...props} icon="dots-vertical" onPress={() => setModal(true)} />} />        
+        }
           <View>
             <Card.Content>     
               <ReadMore
